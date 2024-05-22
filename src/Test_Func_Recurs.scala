@@ -1,56 +1,12 @@
 import scala.collection.mutable.ArrayBuffer
 
-class cell(localisation: Position) {
-
-
+class Cell(localisation: Position) {
 }
 
-class AdjacentCellFree(loc: Position, free: Boolean = true) extends cell(loc) {
+class AdjacentCellFree(loc: Position, f: Boolean = true) extends Cell(loc) {
 
-  def adjacentCell(in: Array[Array[Int]], dir: Direction): Array[AdjacentCellFree] = {
-
-    val result: Array[AdjacentCellFree] = Array.ofDim(3)
-    var adjacentCell_possible: Array[Direction] = Array.ofDim(3)
-
-    dir.orientation match {
-      case 'N' => adjacentCell_possible = Array(new('O'), new('N'), new('E'))
-      case 'S' => adjacentCell_possible = Array(new('O'), new('S'), new('E'))
-      case 'O' => adjacentCell_possible = Array(new('O'), new('N'), new('S'))
-      case 'E' => adjacentCell_possible = Array(new('S'), new('N'), new('E'))
-    }
-
-    for (pos: Int <- result.indices) {
-      val mov: Position = adjacentCell_possible(pos).movement()
-
-      val pos_X_CellAdjacent: Int = loc.x + mov.x
-      val pos_Y_CellAdjacent: Int = loc.y + mov.y
-
-      var cellAdjacentIsFree: Boolean = false
-
-      if ((pos_X_CellAdjacent >= 0 && pos_X_CellAdjacent < in.length) && (pos_Y_CellAdjacent >= 0 && pos_Y_CellAdjacent < in.length)) {
-        cellAdjacentIsFree = true
-      }
-
-      result(pos) = new AdjacentCellFree(new Position(pos_X_CellAdjacent, pos_Y_CellAdjacent), cellAdjacentIsFree)
-    }
-
-    return result
-  }
-
-  def oneOfAdjacentCell(in: Array[Array[Int]], dir: Direction) : AdjacentCellFree ={
-    var result : AdjacentCellFree = null
-    for (pos : Int <- in.indices) {
-      val value : AdjacentCellFree = adjacentCell(in, dir)(pos)
-
-      if(value.free){
-
-
-      }
-
-    }
-
-  }
-
+  val free: Boolean = f
+  val localisation: Position = loc
 
 }
 
@@ -59,7 +15,9 @@ class Position(var x: Int, var y: Int) {
 
 }
 
-class Direction(var orientation: Char = 'N') {
+class Direction(or: Char) {
+
+  val orientation = or
 
   def randomDirInit(): Position = {
     var valueRandom: Int = (math.random() * 4).toInt
@@ -93,7 +51,7 @@ class Direction(var orientation: Char = 'N') {
 }
 
 
-class Grid(in: Array[Array[Int]]) {
+class ToolsGrid(in: Array[Array[Int]]) {
 
   def MaxNumberGrid(): Int = {
 
@@ -108,7 +66,7 @@ class Grid(in: Array[Array[Int]]) {
     return max
   }
 
-  def fillInTheBoxes(in: Array[Array[Int]], orient: Direction, pos: Position): Array[Array[Int]] = {
+  def fillInTheBoxes(orient: Direction, pos: Position): Array[Array[Int]] = {
 
     var posX: Int = pos.x + orient.movement().x
     var posY: Int = pos.y + orient.movement().y
@@ -124,11 +82,63 @@ class Grid(in: Array[Array[Int]]) {
     return in
   }
 
+  def adjacentCell(in: Array[Array[Int]], dir: Direction, loc: Position): Array[AdjacentCellFree] = {
+
+    val result: Array[AdjacentCellFree] = Array.ofDim(3)
+    var adjacentCell_possible: Array[Direction] = Array.ofDim(3)
+
+    dir.orientation match {
+      case 'N' => {
+        adjacentCell_possible = Array(new Direction('O'), new Direction('N'), new Direction('E'))
+      }
+      case 'S' => {
+        adjacentCell_possible = Array(new Direction('O'), new Direction('S'), new Direction('E'))
+      }
+      case 'O' => {
+        adjacentCell_possible = Array(new Direction('O'), new Direction('N'), new Direction('S'))
+      }
+      case 'E' => {
+        adjacentCell_possible = Array(new Direction('S'), new Direction('N'), new Direction('E'))
+      }
+    }
+
+    for (pos: Int <- result.indices) {
+      val mov: Position = adjacentCell_possible(pos).movement()
+
+      val pos_X_CellAdjacent: Int = loc.x + mov.x
+      val pos_Y_CellAdjacent: Int = loc.y + mov.y
+
+      var cellAdjacentIsFree: Boolean = false
+
+      if ((pos_X_CellAdjacent >= 0 && pos_X_CellAdjacent < in.length) && (pos_Y_CellAdjacent >= 0 && pos_Y_CellAdjacent < in.length) && in(pos_X_CellAdjacent)(pos_Y_CellAdjacent) == 0) {
+        cellAdjacentIsFree = true
+      }
+
+      result(pos) = new AdjacentCellFree(new Position(pos_X_CellAdjacent, pos_Y_CellAdjacent), cellAdjacentIsFree)
+    }
+
+    return result
+  }
+
+  def oneOfAdjacentCell(in: Array[Array[Int]], dir: Direction, loc: Position): Position = {
+    var result: AdjacentCellFree = null
+    for (pos: Int <- in.indices) {
+      val value: AdjacentCellFree = adjacentCell(in, dir,loc)(pos)
+
+      if (value.free) {
+        result = value
+      }
+
+    }
+
+    return result.localisation
+  }
+
 
 }
 
 
-class GridValid(var result: Array[Array[Int]], var valid: Boolean) extends Grid(result) {
+class GridValid(var result: Array[Array[Int]], var valid: Boolean) extends ToolsGrid(result) {
 
 }
 
@@ -161,41 +171,33 @@ object main extends App {
   }
 
 
-  def generateGrid(in: Array[Array[Int]], dir: Direction): GridValid = {
-    var finalGrid: Array[Array[Int]] = in
+    def generateGrid(in: Array[Array[Int]], dir: Direction): GridValid = {
+      var finalGrid: Array[Array[Int]] = in
 
-    val posDepart: Position = new Position((math.random() * in.length - 1).toInt, (math.random() * in.length - 1).toInt)
-
-
-    val orientInitPos : Array[Direction] = Array(new Direction('N'),new Direction('S'),new Direction('E'),new Direction('W'))
-
-    val directionMovementInit: Position = new AdjacentCellFree(posDepart).adjacentCell(in,orientInitPos((math.random()*3).toInt))()
-    finalGrid(posDepart.x)(posDepart.y) = 1
+      val posDepart: Position = new Position((math.random() * in.length - 1).toInt, (math.random() * in.length - 1).toInt)
 
 
-    // Convergence de la fonction récursive
-    if (occupation(finalGrid) >= 0.8) {
-      return new GridValid(finalGrid, true)
-    }
-
-    else {
-      new
+      val orientInitPossible : Array[Direction] = Array(new Direction('N'),new Direction('S'),new Direction('E'),new Direction('W'))
+      val orientInit : Direction = orientInitPossible((math.random()*3).toInt)
+      val directionMovementInit: Position = new AdjacentCellFree(posDepart).oneOfAdjacentCell(in,orientInit)
 
 
+      finalGrid(posDepart.x)(posDepart.y) = 1
+      finalGrid = new ToolsGrid(finalGrid).fillInTheBoxes(orientInit,directionMovementInit)
 
 
-
-
-
-      if (occupation(finalGrid) >= 0.8) {
-        println("Résolu")
+      // Convergence de la fonction récursive
+      if (occupation(finalGrid) >= 0.8 ) {
         return new GridValid(finalGrid, true)
       }
 
+      else {
 
+
+
+      }
+      return
     }
-    return
-  }
 
   println("-----------------------------------------------------------------------------------------")
   printGrid(generateGrid(test))
