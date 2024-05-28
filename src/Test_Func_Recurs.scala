@@ -173,13 +173,15 @@ object main extends App {
 
     def generateGrid(in: Array[Array[Int]], dir: Direction): GridValid = {
       var finalGrid: Array[Array[Int]] = in
+      var toolsGrid = new ToolsGrid(finalGrid)
+
 
       val posDepart: Position = new Position((math.random() * in.length - 1).toInt, (math.random() * in.length - 1).toInt)
 
 
       val orientInitPossible : Array[Direction] = Array(new Direction('N'),new Direction('S'),new Direction('E'),new Direction('W'))
       val orientInit : Direction = orientInitPossible((math.random()*3).toInt)
-      val directionMovementInit: Position = new AdjacentCellFree(posDepart).oneOfAdjacentCell(in,orientInit)
+      val directionMovementInit: Position = toolsGrid.oneOfAdjacentCell(in,orientInit)
 
 
       finalGrid(posDepart.x)(posDepart.y) = 1
