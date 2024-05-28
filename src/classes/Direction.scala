@@ -3,6 +3,8 @@ package classes
 abstract class Direction {
   var actionX:Int
   var actionY:Int
+
+
 }
 case class North() extends Direction{
   override var actionX: Int = 0

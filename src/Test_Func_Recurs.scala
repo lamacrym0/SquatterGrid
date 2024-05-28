@@ -1,24 +1,22 @@
 import scala.collection.mutable.ArrayBuffer
 
-class Cell(localisation: Position) {
-}
 
-class AdjacentCellFree(loc: Position, f: Boolean = true) extends Cell(loc) {
+//class Cell(localisation: Position) {}
 
-  val free: Boolean = f
-  val localisation: Position = loc
+//class AdjacentCellFree(loc: Position, f: Boolean = true) extends Cell(loc) {
 
-}
+  //val free: Boolean = f
+//val localisation: Position = loc
+
+//}
 
 
-class Position(var x: Int, var y: Int) {
+//class Position(var x: Int, var y: Int) {}
 
-}
+//class Direction(or: Char) {
 
-class Direction(or: Char) {
-
-  val orientation = or
-
+  //val orientation = or
+/*
   def randomDirInit(): Position = {
     var valueRandom: Int = (math.random() * 4).toInt
     if (valueRandom == 0) {
@@ -45,14 +43,14 @@ class Direction(or: Char) {
       case 'E' => result.x = 1
     }
     return result
-  }
+ // }
 
 
 }
 
 
 class ToolsGrid(in: Array[Array[Int]]) {
-
+/*
   def MaxNumberGrid(): Int = {
 
     var max: Int = 0
@@ -65,6 +63,8 @@ class ToolsGrid(in: Array[Array[Int]]) {
     }
     return max
   }
+
+  */
 
   def fillInTheBoxes(orient: Direction, pos: Position): Array[Array[Int]] = {
 
@@ -193,11 +193,7 @@ object main extends App {
         return new GridValid(finalGrid, true)
       }
 
-      else {
-
-
-
-      }
+      else {}
       return
     }
 
@@ -206,5 +202,5 @@ object main extends App {
 
 
 }
-
+*/
 
