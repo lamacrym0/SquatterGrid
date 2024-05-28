@@ -46,8 +46,8 @@ class Grid (x:Int,y:Int) {
   }
 
   def move(action: Direction): Unit = {
-    var headX: Int = getHeadPos()(1)
-    var headY: Int = getHeadPos()(0)
+    var headX: Int = getHeadPos(1)
+    var headY: Int = getHeadPos(0)
 
     if(action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0 ) {
       return
