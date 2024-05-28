@@ -5,14 +5,6 @@ import scala.collection.mutable.ArrayBuffer
 object test extends App{
   var grid:Grid = new Grid(3,2)
   grid.display()
-  grid.move(North())
-  grid.display()
-  grid.move(East())
-  grid.display()
-  grid.move(South())
-  grid.display()
-  grid.move(West())
-  grid.display()
 }
 class Grid (x:Int,y:Int) {
   var grid:ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
@@ -45,6 +37,14 @@ class Grid (x:Int,y:Int) {
     }
   }
 
+  def gridIsFinish:Boolean = {
+    for(y<-grid.indices){
+      for(x<-grid(y).indices if(grid(y)(x).getValueInt == 0)){
+        return false
+      }
+    }
+    true
+  }
   def move(action: Direction): Unit = {
     var headX: Int = getHeadPos(1)
     var headY: Int = getHeadPos(0)
@@ -73,8 +73,6 @@ class Grid (x:Int,y:Int) {
     }
     res
   }
-
-
 
 }
 
