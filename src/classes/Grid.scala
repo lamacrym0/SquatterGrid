@@ -43,10 +43,11 @@ class Grid(x: Int, y: Int) {
       grid(idy).addOne(new Cellule())
     }
   }
-  // grid(1)(0).setValueInt(1)
+   grid(0)(0).setValueInt(1)
 
 
   def display(): Unit = {
+    print("\r")
     for (y <- grid.indices) {
       for (x <- grid(y).indices) {
         if (!grid(y)(x).isObstacl) {
@@ -60,7 +61,7 @@ class Grid(x: Int, y: Int) {
           print("X ")
         }
       }
-      println()
+      print("\n")
     }
   }
 
@@ -72,11 +73,13 @@ class Grid(x: Int, y: Int) {
 
     for (action <- actions) {
       if (!(action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0)) {
-        if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
-          return false
+        if (!(grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter)) {
+          return true
+
+        }
       }
     }
-    true
+    false
   }
 
   def gridIsFinish: Boolean = {
@@ -88,20 +91,20 @@ class Grid(x: Int, y: Int) {
     true
   }
 
-  def move(action: Direction): Unit = {
+  def move(action: Direction): Int = {
     var headX: Int = getHeadPos.x
     var headY: Int = getHeadPos.y
 
     if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0) {
-      return
+      return 0
     }
 
     else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter) {
-      return
+      return 0
     }
     else {
       grid(headY + action.actionY)(headX + action.actionX).setValueInt(grid(headY)(headX).getValueInt + 1)
-      move(action)
+      return 1 + move(action)
     }
   }
 
