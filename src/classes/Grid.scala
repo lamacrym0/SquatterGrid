@@ -5,26 +5,19 @@ import jdk.jfr.Percentage
 import scala.collection.mutable.ArrayBuffer
 
 object test extends App {
-  var gridTest: Grid = new Grid(6, 6)
+  val columnGrid: Int = 5
+  val lignGrid: Int = 8
+  var gridTest: Grid = new Grid(columnGrid, lignGrid)
 
 
   gridTest.display()
 
   println("----------------------------------------------------------------------")
 
-  var percentSolve: Boolean = false
-  var percentMini: Double = 0.9
-
-  while (!percentSolve) {
-    gridTest.fillGridWith("Vide")
-
-    percentSolve = gridTest.generateGrid(percentMini,((0.14 *(6 * 6))).toInt)
-    println(s"% occ ${gridTest.occupation() * 100}")
-
-  }
+  var percentMini: Double = 0.8
 
 
-  gridTest.fillGridWith()
+  gridTest.generateGrid(percentMini, ((0.13 * (columnGrid * lignGrid))).toInt)
   gridTest.display()
 
 
@@ -40,7 +33,7 @@ class Grid(x: Int, y: Int) {
       grid(idy).addOne(new Cellule())
     }
   }
-   grid(0)(0).setValueInt(1)
+  grid(0)(0).setValueInt(1)
 
 
   def display(): Unit = {
@@ -275,9 +268,9 @@ class Grid(x: Int, y: Int) {
 
     if (nbObstacleInit > 0) {
       while (counterObstacles < nbObstacleInit) {
-
         val posXObs: Int = (math.random() * grid(0).length - 1).toInt
         val posYObs: Int = (math.random() * grid.length - 1).toInt
+
 
         val value: Cellule = grid(posYObs)(posXObs)
 
@@ -293,12 +286,13 @@ class Grid(x: Int, y: Int) {
 
     // Initialistion direction de départ
     val initialAvailableCells: Array[Position] = adjacentCell()
-    val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
-    val initialMove: Position = initialAvailableCells(randomNb)
+    if (initialAvailableCells.length != 0) {
+      val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
+      val initialMove: Position = initialAvailableCells(randomNb)
 
-
-    // 1er Mouvement
-    moveWithAdjacentCell(initialMove)
+      // 1er Mouvement
+      moveWithAdjacentCell(initialMove)
+    }
 
 
     def find(): Boolean = {
@@ -320,25 +314,43 @@ class Grid(x: Int, y: Int) {
 
           moveWithAdjacentCell(candidat)
 
-
-          display()
-          println("--------------------------------------------------------")
-
           if (find()) {
             return true
           }
+
           else {
             grid = saveGrid
             return false
           }
+
         }
+
         return false
       }
     }
 
-    return find()
+    if (find()) {
+      println(occupation())
+      fillGridWith()
+      return true
+    }
+    else {
 
+      //New Grid
+      fillGridWith("Vide")
+      // Initialiser une nouvelle position de départ
+      val newDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
+
+      if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom)) {
+        return true
+      }
+
+      else {
+        return false
+      }
+
+
+    }
   }
-
 
 }
