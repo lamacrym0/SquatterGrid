@@ -1,34 +1,31 @@
 package classes
 
+import jdk.jfr.Percentage
+
 import scala.collection.mutable.ArrayBuffer
 
 object test extends App {
-  var gridTest: Grid = new Grid(11, 10)
-
-
+  var gridTest: Grid = new Grid(6, 6)
 
 
   gridTest.display()
-
-  for(i : Int <- 0 to 5) {
-    gridTest.grid(2+i)(2).isObstacl = true
-    gridTest.grid(2+i)(3).isObstacl = true
-  }
-  for (i: Int <- 0 to 3) {
-    gridTest.grid(5)(2+i).isObstacl = true
-    gridTest.grid(6)(2+i).isObstacl = true
-  }
-
-
 
   println("----------------------------------------------------------------------")
 
+  var percentSolve: Boolean = false
+  var percentMini: Double = 0.9
+
+  while (!percentSolve) {
+    gridTest.fillGridWith("Vide")
+
+    percentSolve = gridTest.generateGrid(percentMini,((0.14 *(6 * 6))).toInt)
+    println(s"% occ ${gridTest.occupation() * 100}")
+
+  }
 
 
-
-  println(gridTest.generateGrid())
+  gridTest.fillGridWith()
   gridTest.display()
-  println(s"% occ ${gridTest.occupation()*100}")
 
 
 }
@@ -121,17 +118,26 @@ class Grid(x: Int, y: Int) {
   // Fonction pour calculer le pourcentage d'occupation de la surface par le "Squatter"
   def occupation(): Double = {
     var counter: Double = 0
+    var counterObstacle: Double = 0
+    val surfaceInit: Double = (grid.length) * (grid(0).length)
 
     for (lign: Int <- grid.indices) {
       for (column: Int <- grid(lign).indices) {
-        val value: Int = grid(lign)(column).getValueInt
+        val value: Cellule = grid(lign)(column)
 
-        if (value == 0) {
+
+        if (value.getValueInt != 0 && !value.isObstacl) {
           counter += 1.0
         }
+
+        else if (value.isObstacl) {
+          counterObstacle += 1
+        }
+
       }
     }
-    return 1 - ( (counter) / (grid.length * grid(0).length))
+
+    return ((counter) / (surfaceInit - counterObstacle))
   }
 
 
@@ -221,15 +227,66 @@ class Grid(x: Int, y: Int) {
     else return nb1
   }
 
+  // Fonction pour finir de remplir la grille avec des obstacles ( 0 remplacé par un obstacle)
+  def fillGridWith(what: String = "Obstacle"): Unit = {
+    for (lign: Int <- grid.indices) {
+      for (column: Int <- grid(lign).indices) {
+        val value: Cellule = grid(lign)(column)
 
-  def generateGrid(): Boolean = {
+        what match {
+          case "Obstacle" => {
+            if (value.getValueInt == 0) {
+              grid(lign)(column).isObstacl = true
+            }
+          }
+
+          case "Vide" => {
+            {
+              grid(lign)(column).isObstacl = false
+              grid(lign)(column).setValueInt(0)
+            }
+          }
 
 
-    // Initialiser la postion de départ
-    val posDepart: Position = new Position((math.random() * grid.length - 1).toInt, (math.random() * grid.length - 1).toInt)
+        }
+
+      }
+    }
+
+
+  }
+
+
+  // Initialiser la postion de départ
+  private val posDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
+
+  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom): Boolean = {
+
 
     // Initialisiation sur la grille
     grid(posDepart.y)(posDepart.x).setValueInt(1)
+
+
+    // création d'obstacles imposés
+    var counterObstacles: Int = 0
+
+    if (nbObstacleInit > 0) {
+      while (counterObstacles < nbObstacleInit) {
+
+        val posXObs: Int = (math.random() * grid(0).length - 1).toInt
+        val posYObs: Int = (math.random() * grid.length - 1).toInt
+
+        val value: Cellule = grid(posYObs)(posXObs)
+
+        if (!value.isObstacl && value.getValueInt < 1) {
+
+          grid(posYObs)(posXObs).isObstacl = true
+
+          counterObstacles += 1
+        }
+      }
+    }
+
 
     // Initialistion direction de départ
     val initialAvailableCells: Array[Position] = adjacentCell()
@@ -247,7 +304,7 @@ class Grid(x: Int, y: Int) {
       // Trouver les nouvelles cellules adjacentes après le 1er mouvement
       val nextAvailableCells: Array[Position] = adjacentCell()
 
-      if (occupation() > 0.8 && nextAvailableCells.length == 0) {
+      if (occupation() > percentageCoverGrid && nextAvailableCells.length == 0) {
         return true
       }
       else if (nextAvailableCells.length == 0) {
