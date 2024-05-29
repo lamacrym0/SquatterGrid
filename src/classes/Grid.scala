@@ -55,8 +55,8 @@ class Grid(x: Int, y: Int) {
   }
 
   def move(action: Direction): Unit = {
-    var headX: Int = getHeadPos(1)
-    var headY: Int = getHeadPos(0)
+    var headX: Int = getHeadPos.x
+    var headY: Int = getHeadPos.y
 
     if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0) {
       return
@@ -70,14 +70,14 @@ class Grid(x: Int, y: Int) {
     move(action)
   }
 
-  def getHeadPos: Array[Int] = {
-    var res: Array[Int] = Array(0, 0)
+  def getHeadPos: Position = {
+    var res: Position = new Position(0,0)
     var maxVal: Int = 0;
     for (y <- grid.indices) {
       for (x <- grid(y).indices if (grid(y)(x).getValueInt > maxVal)) {
 
         maxVal = grid(y)(x).getValueInt
-        res = Array(y, x)
+        res = new Position(y,x)
       }
     }
     res
@@ -102,8 +102,8 @@ class Grid(x: Int, y: Int) {
 
   // Fonction pour avoir les localisations des différentes cellules adjacentes possibles, pour ce déplacer
   def adjacentCell(): Array[Position] = {
-    var headX: Int = getHeadPos(1)
-    var headY: Int = getHeadPos(0)
+    var headX: Int = getHeadPos.x
+    var headY: Int = getHeadPos.y
 
     val listAdjacentCell: ArrayBuffer[Position] = new ArrayBuffer[Position]()
 
@@ -133,10 +133,8 @@ class Grid(x: Int, y: Int) {
   // Fonction pour faire le mouvement réalisé avec la position donné d'une cellule adjacente
   def moveWithAdjacentCell(pos: Position): Unit = {
 
-    val posDepart: Array[Int] = getHeadPos
-
-    val headX: Int = getHeadPos(1)
-    val headY: Int = getHeadPos(0)
+    val headX: Int = getHeadPos.x
+    val headY: Int = getHeadPos.y
 
 
     val xMove: Int = pos.x - headX
