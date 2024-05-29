@@ -24,7 +24,7 @@ class Grid(x: Int, y: Int) {
       grid(idy).addOne(new Cellule())
     }
   }
-  grid(1)(0).setValueInt(1)
+  // grid(1)(0).setValueInt(1)
 
 
   def display(): Unit = {
@@ -83,6 +83,23 @@ class Grid(x: Int, y: Int) {
     res
   }
 
+  // Fonction pour calculer le pourcentage d'occupation de la surface par le "Squatter"
+  def occupation(): Double = {
+    var counter: Int = 0
+
+    for (lign: Int <- grid.indices) {
+      for (column: Int <- grid(lign).indices) {
+        val value: Int = grid(lign)(column)
+
+        if (value == 0) {
+          counter += 1
+        }
+      }
+    }
+    return 1 - counter / (grid.length * grid(0).length)
+  }
+
+
   // Fonction pour avoir les localisations des différentes cellules adjacentes possibles, pour ce déplacer
   def adjacentCell(): Array[Position] = {
     var headX: Int = getHeadPos(1)
@@ -113,12 +130,87 @@ class Grid(x: Int, y: Int) {
     return listAdjacentCell.toArray
   }
 
-  // Fonction qui permet de remplacer un chiffre négatif, par 0. Utilisé dans la fonction adjacentCell(), pour ne pas avoir de coordonnée négative
-  def stayInTheGrid(nb: Int): Int = {
-    if (nb >= 0) {
-      return nb
+  // Fonction pour faire le mouvement réalisé avec la position donné d'une cellule adjacente
+  def moveWithAdjacentCell(pos: Position): Unit = {
+
+    val posDepart: Array[Int] = getHeadPos
+
+    val headX: Int = getHeadPos(1)
+    val headY: Int = getHeadPos(0)
+
+
+    val xMove: Int = pos.x - headX
+    val yMove: Int = pos.y - headY
+
+    // 1er Mouvement
+    if (yMove != 0 || xMove != 0) {
+      if (yMove == 0) {
+        if (xMove < 0) {
+          move(East())
+        }
+        else {
+          move(West())
+        }
+      }
+      else {
+        if (yMove < 0) {
+          move(North())
+        }
+        else {
+          move(South())
+        }
+      }
     }
-    else return 0
   }
 
-}
+    // Fonction qui permet de remplacer un chiffre négatif, par 0. Utilisé dans la fonction adjacentCell(), pour ne pas avoir de coordonnée négative
+    def stayInTheGrid(nb: Int): Int = {
+      if (nb >= 0) {
+        return nb
+      }
+      else return 0
+    }
+
+    def generateGrid(): Boolean = {
+
+
+      // Initialiser la postion de départ
+      val posDepart: Position = new Position((math.random() * grid.length - 1).toInt, (math.random() * grid.length - 1).toInt)
+
+      // Initialisiation sur la grille
+      grid(posDepart.y)(posDepart.x).setValueInt(1)
+
+      // Initialistion direction de départ
+      val initialAvailableCells: Array[Position] = adjacentCell()
+      val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
+      val initialMove: Position = initialAvailableCells(randomNb)
+
+
+      val xWay: Int = initialMove.x - posDepart.x
+      val yWay: Int = initialMove.y - posDepart.y
+
+      // 1er Mouvement
+      moveWithAdjacentCell(new Position(xWay,yWay))
+
+      // Trouver les nouvelles cellules adjacentes après le 1er mouvement
+      val nextAvailableCells: Array[Position] = adjacentCell()
+
+      if (occupation() > 0.8 && nextAvailableCells.length == 0) {
+        return true
+      }
+
+      else {
+        for (candidat: Position <- nextAvailableCells) {
+          if ()
+
+
+        }
+
+
+      }
+
+
+    }
+
+
+  }
