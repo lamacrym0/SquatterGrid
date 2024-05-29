@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object test extends App {
   val columnGrid: Int = 5
-  val lignGrid: Int = 8
+  val lignGrid: Int = 6
   var gridTest: Grid = new Grid(columnGrid, lignGrid)
 
 
@@ -336,7 +336,7 @@ class Grid(x: Int, y: Int) {
     }
 
     if (find()) {
-      println(occupation())
+      println(s"Rempli à: ${(occupation() * 100).toInt} %")
       fillGridWith()
       return true
     }
@@ -347,6 +347,7 @@ class Grid(x: Int, y: Int) {
       // Initialiser une nouvelle position de départ
       val newDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
+      //Appel récursif pour essayer une nouvelle postion de départ
       if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom)) {
         return true
       }
