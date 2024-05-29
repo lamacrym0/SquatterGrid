@@ -62,6 +62,21 @@ class Grid(x: Int, y: Int) {
     }
   }
 
+  def headCanMove():Boolean = {
+    var headX: Int = getHeadPos.x
+    var headY: Int = getHeadPos.y
+
+    var actions:Array[Direction] = Array(North(),South(),East(),West())
+
+    for(action <- actions){
+      if (!(action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0)) {
+        if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
+          return false
+      }
+    }
+    true
+  }
+
   def gridIsFinish: Boolean = {
     for (y <- grid.indices) {
       for (x <- grid(y).indices if (grid(y)(x).getValueInt == 0)) {
@@ -88,13 +103,13 @@ class Grid(x: Int, y: Int) {
   }
 
   def getHeadPos: Position = {
-    var res: Position = new Position(0, 0)
+    var res: Position = new Position(0,0)
     var maxVal: Int = 0;
     for (y <- grid.indices) {
       for (x <- grid(y).indices if (grid(y)(x).getValueInt > maxVal)) {
 
         maxVal = grid(y)(x).getValueInt
-        res = new Position(y, x)
+        res = new Position(x,y)
       }
     }
     res
@@ -239,10 +254,12 @@ class Grid(x: Int, y: Int) {
         }
       }
       return false
+
     }
 
     return find()
 
   }
+
 
 }
