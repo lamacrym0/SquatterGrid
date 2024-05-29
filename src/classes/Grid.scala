@@ -3,7 +3,21 @@ package classes
 import scala.collection.mutable.ArrayBuffer
 
 object test extends App {
-  var gridTest: Grid = new Grid(10, 9)
+  var gridTest: Grid = new Grid(11, 10)
+
+
+
+
+  gridTest.display()
+
+  for(i : Int <- 0 to 5) {
+    gridTest.grid(2+i)(2).isObstacl = true
+    gridTest.grid(2+i)(3).isObstacl = true
+  }
+  for (i: Int <- 0 to 3) {
+    gridTest.grid(5)(2+i).isObstacl = true
+    gridTest.grid(6)(2+i).isObstacl = true
+  }
 
 
 
@@ -14,6 +28,7 @@ object test extends App {
 
   println(gridTest.generateGrid())
   gridTest.display()
+  println(s"% occ ${gridTest.occupation()*100}")
 
 
 }
@@ -105,18 +120,18 @@ class Grid(x: Int, y: Int) {
 
   // Fonction pour calculer le pourcentage d'occupation de la surface par le "Squatter"
   def occupation(): Double = {
-    var counter: Int = 0
+    var counter: Double = 0
 
     for (lign: Int <- grid.indices) {
       for (column: Int <- grid(lign).indices) {
         val value: Int = grid(lign)(column).getValueInt
 
         if (value == 0) {
-          counter += 1
+          counter += 1.0
         }
       }
     }
-    return 1 - counter / (grid.length * grid(0).length)
+    return 1 - ( (counter) / (grid.length * grid(0).length))
   }
 
 
@@ -146,7 +161,7 @@ class Grid(x: Int, y: Int) {
       }
 
     }
-    println(s"cell adja disp : ${listAdjacentCell.mkString(",")}")
+
     return listAdjacentCell.toArray
   }
 
@@ -155,33 +170,27 @@ class Grid(x: Int, y: Int) {
 
     val headX: Int = getHeadPos.x
     val headY: Int = getHeadPos.y
-    println(s"xHead $headX et yHead $headY")
+
 
     val xMove: Int = pos.x - headX
     val yMove: Int = pos.y - headY
-
-    println(s"xMove $xMove et yMove $yMove")
 
     // 1er Mouvement
     if (yMove != 0 || xMove != 0) {
       if (yMove == 0) {
         if (xMove < 0) {
           move(West())
-          println("West")
         }
         else {
           move(East())
-          println("East")
         }
       }
       else {
         if (yMove < 0) {
           move(North())
-          println("North")
         }
         else {
           move(South())
-          println("South")
         }
       }
     }
