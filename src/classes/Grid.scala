@@ -89,7 +89,7 @@ class Grid(x: Int, y: Int) {
 
     for (lign: Int <- grid.indices) {
       for (column: Int <- grid(lign).indices) {
-        val value: Int = grid(lign)(column)
+        val value: Int = grid(lign)(column).getValueInt
 
         if (value == 0) {
           counter += 1
@@ -163,54 +163,63 @@ class Grid(x: Int, y: Int) {
     }
   }
 
-    // Fonction qui permet de remplacer un chiffre négatif, par 0. Utilisé dans la fonction adjacentCell(), pour ne pas avoir de coordonnée négative
-    def stayInTheGrid(nb: Int): Int = {
-      if (nb >= 0) {
-        return nb
-      }
-      else return 0
+  // Fonction qui permet de remplacer un chiffre négatif, par 0. Utilisé dans la fonction adjacentCell(), pour ne pas avoir de coordonnée négative
+  def stayInTheGrid(nb: Int): Int = {
+    if (nb >= 0) {
+      return nb
+    }
+    else return 0
+  }
+
+  def generateGrid(): Boolean = {
+
+
+    // Initialiser la postion de départ
+    val posDepart: Position = new Position((math.random() * grid.length - 1).toInt, (math.random() * grid.length - 1).toInt)
+
+    // Initialisiation sur la grille
+    grid(posDepart.y)(posDepart.x).setValueInt(1)
+
+    // Initialistion direction de départ
+    val initialAvailableCells: Array[Position] = adjacentCell()
+    val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
+    val initialMove: Position = initialAvailableCells(randomNb)
+
+
+    val xWay: Int = initialMove.x - posDepart.x
+    val yWay: Int = initialMove.y - posDepart.y
+
+    // 1er Mouvement
+    moveWithAdjacentCell(new Position(xWay, yWay))
+
+    // Trouver les nouvelles cellules adjacentes après le 1er mouvement
+    val nextAvailableCells: Array[Position] = adjacentCell()
+
+    if (occupation() > 0.8 && nextAvailableCells.length == 0) {
+      return true
     }
 
-    def generateGrid(): Boolean = {
+    else {
+      for (candidat: Position <- nextAvailableCells) {
 
+        val saveGrid: ArrayBuffer[ArrayBuffer[Cellule]] = grid
 
-      // Initialiser la postion de départ
-      val posDepart: Position = new Position((math.random() * grid.length - 1).toInt, (math.random() * grid.length - 1).toInt)
+        val nextAvailableCells2: Array[Position] = adjacentCell()
 
-      // Initialisiation sur la grille
-      grid(posDepart.y)(posDepart.x).setValueInt(1)
-
-      // Initialistion direction de départ
-      val initialAvailableCells: Array[Position] = adjacentCell()
-      val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
-      val initialMove: Position = initialAvailableCells(randomNb)
-
-
-      val xWay: Int = initialMove.x - posDepart.x
-      val yWay: Int = initialMove.y - posDepart.y
-
-      // 1er Mouvement
-      moveWithAdjacentCell(new Position(xWay,yWay))
-
-      // Trouver les nouvelles cellules adjacentes après le 1er mouvement
-      val nextAvailableCells: Array[Position] = adjacentCell()
-
-      if (occupation() > 0.8 && nextAvailableCells.length == 0) {
-        return true
-      }
-
-      else {
-        for (candidat: Position <- nextAvailableCells) {
-          if ()
-
-
+        if (generateGrid()) {
+          return true
         }
-
-
+        else {
+          grid = saveGrid
+          return false
+        }
       }
-
+      return false
 
     }
 
 
   }
+
+
+}
