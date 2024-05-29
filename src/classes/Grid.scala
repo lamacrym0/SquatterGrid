@@ -3,28 +3,16 @@ package classes
 import scala.collection.mutable.ArrayBuffer
 
 object test extends App {
-  var gridTest: Grid = new Grid(10, 8)
+  var gridTest: Grid = new Grid(10, 9)
 
-  //  gridTest.grid(4)(3).setValueInt(1)
-  /*
-  gridTest.display()
-  println("--------------------------------------------------------------------------")
-  gridTest.move(North())
-  gridTest.display()
 
-  val oneOfAdjacentCell: Position = gridTest.adjacentCell()(1)
-  println(s"Head x : ${gridTest.getHeadPos.x} et y  ${gridTest.getHeadPos.y}")
-  println(s"x : ${oneOfAdjacentCell.x} et y  ${oneOfAdjacentCell.y}")
-  gridTest.display()
-  println("--------------------------------------------------------------------------")
-  gridTest.moveWithAdjacentCell(oneOfAdjacentCell)
 
-  gridTest.display()
-  println("--------------------------------------------------------------------------")
+  println("----------------------------------------------------------------------")
 
-  */
 
-  gridTest.generateGrid()
+
+
+  println(gridTest.generateGrid())
   gridTest.display()
 
 
@@ -141,8 +129,8 @@ class Grid(x: Int, y: Int) {
 
     for (i: Int <- -1 to 1; if (i != 0)) {
 
-      val headYC: Int = stayInTheGrid(headY + i)
-      val headXC: Int = stayInTheGrid(headX + i)
+      val headYC: Int = stayInTheGrid(headY + i, 'C')
+      val headXC: Int = stayInTheGrid(headX + i, 'L')
 
       val posUD: Position = new Position(headX, headYC)
       val posRL: Position = new Position(headXC, headY)
@@ -158,7 +146,7 @@ class Grid(x: Int, y: Int) {
       }
 
     }
-
+    println(s"cell adja disp : ${listAdjacentCell.mkString(",")}")
     return listAdjacentCell.toArray
   }
 
@@ -167,7 +155,7 @@ class Grid(x: Int, y: Int) {
 
     val headX: Int = getHeadPos.x
     val headY: Int = getHeadPos.y
-
+    println(s"xHead $headX et yHead $headY")
 
     val xMove: Int = pos.x - headX
     val yMove: Int = pos.y - headY
@@ -178,12 +166,12 @@ class Grid(x: Int, y: Int) {
     if (yMove != 0 || xMove != 0) {
       if (yMove == 0) {
         if (xMove < 0) {
-          move(East())
-          println("East")
-        }
-        else {
           move(West())
           println("West")
+        }
+        else {
+          move(East())
+          println("East")
         }
       }
       else {
@@ -200,12 +188,30 @@ class Grid(x: Int, y: Int) {
   }
 
   // Fonction qui permet de remplacer un chiffre négatif, par 0. Utilisé dans la fonction adjacentCell(), pour ne pas avoir de coordonnée négative
-  def stayInTheGrid(nb: Int): Int = {
+  def notNegative(nb: Int): Int = {
     if (nb >= 0) {
       return nb
     }
     else return 0
   }
+
+  def stayInTheGrid(nb: Int, typ: Char): Int = {
+    var sup: Int = 0
+    var nb1: Int = notNegative(nb)
+
+    if (typ == 'C') {
+      sup = grid.length
+    }
+    else {
+      sup = grid(0).length
+    }
+
+    if (nb >= sup) {
+      return sup - 1
+    }
+    else return nb1
+  }
+
 
   def generateGrid(): Boolean = {
 
@@ -223,7 +229,7 @@ class Grid(x: Int, y: Int) {
 
 
     // 1er Mouvement
-    moveWithAdjacentCell(new Position(posDepart.x, posDepart.y))
+    moveWithAdjacentCell(initialMove)
 
 
     def find(): Boolean = {
@@ -235,26 +241,30 @@ class Grid(x: Int, y: Int) {
       if (occupation() > 0.8 && nextAvailableCells.length == 0) {
         return true
       }
-
-      for (candidat: Position <- nextAvailableCells) {
-
-        val saveGrid: ArrayBuffer[ArrayBuffer[Cellule]] = grid
-
-        moveWithAdjacentCell(candidat)
-
-
-        display()
-        println("--------------------------------------------------------")
-
-        if (find()) {
-          return true
-        }
-        else {
-          grid = saveGrid
-          return false
-        }
+      else if (nextAvailableCells.length == 0) {
+        return false
       }
-      return false
+      else {
+        for (candidat: Position <- nextAvailableCells) {
+
+          val saveGrid: ArrayBuffer[ArrayBuffer[Cellule]] = grid.clone()
+
+          moveWithAdjacentCell(candidat)
+
+
+          display()
+          println("--------------------------------------------------------")
+
+          if (find()) {
+            return true
+          }
+          else {
+            grid = saveGrid
+            return false
+          }
+        }
+        return false
+      }
     }
 
     return find()
