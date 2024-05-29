@@ -43,6 +43,12 @@ class Grid(x: Int, y: Int) {
    grid(0)(0).setValueInt(1)
 
 
+  def resetGrid():Unit ={
+    for(y<-grid.indices;x<-grid(y).indices if(grid(y)(x).getValueInt != 0 || grid(y)(x).getValueInt != 1)){
+      grid(y)(x).setValueInt(0)
+    }
+  }
+
   def display(): Unit = {
     print("\r")
     for (y <- grid.indices) {

@@ -3,6 +3,9 @@ package classes
 import ch.hevs.gdx2d.desktop.PortableApplication
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton
+
 
 object application extends App{
   var game :SquatterGrid = new SquatterGrid()
@@ -15,6 +18,7 @@ class SquatterGrid() extends PortableApplication{
   var line:Int = 0
   var column:Int = 0
   var obsacl:Int = 0
+  //var newGameButton = new
 
   def stratCmdGame(line:Int,column:Int): Unit = {
     this.line = line
@@ -26,6 +30,11 @@ class SquatterGrid() extends PortableApplication{
 
   override def onInit(): Unit = {
     setTitle("Hello World - mui 2024")
+   /* newGameButton = new TextButton("Click me", skin) // Use the initialized skin
+
+    newGameButton.setWidth(buttonWidth)
+    newGameButton.setHeight(buttonHeight)
+*/
   }
 
   override def onKeyDown(keycode: Int): Unit = {
@@ -52,8 +61,11 @@ class SquatterGrid() extends PortableApplication{
             if(nbLvl %2 ==0)
               obsacl += 1
 
-            stratCmdGame(line,column)
+
+          }else {
+            grid.resetGrid()
           }
+          stratCmdGame(line,column)
         }
 
       case _ =>
@@ -80,7 +92,7 @@ class SquatterGrid() extends PortableApplication{
   override def onGraphicRender(g: GdxGraphics): Unit = {
 
     g.clear()
-    g.drawStringCentered(getWindowHeight * 0.8f, "Welcome to gdx2d !")
+    g.setBackgroundColor(Color.valueOf("48d055"))
     g.drawFPS()
     g.drawSchoolLogo()
   }
