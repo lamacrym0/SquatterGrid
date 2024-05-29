@@ -3,14 +3,31 @@ package classes
 import scala.collection.mutable.ArrayBuffer
 
 object test extends App {
-  var grid: Grid = new Grid(4, 6)
+  var gridTest: Grid = new Grid(10, 8)
+
+  gridTest.grid(4)(3).setValueInt(1)
+  gridTest.display()
+  println("--------------------------------------------------------------------------")
+  gridTest.move(North())
+  gridTest.display()
+  /*
+  val oneOfAdjacentCell: Position = gridTest.adjacentCell()(1)
+  println(s"Head x : ${gridTest.getHeadPos.x} et y  ${gridTest.getHeadPos.y}")
+  println(s"x : ${oneOfAdjacentCell.x} et y  ${oneOfAdjacentCell.y}")
+  gridTest.display()
+  println("--------------------------------------------------------------------------")
+  gridTest.moveWithAdjacentCell(oneOfAdjacentCell)
+
+  gridTest.display()
+  println("--------------------------------------------------------------------------")
+*/
+  /*
   grid.display()
-  val result: Array[Position] = grid.adjacentCell()
-  for (quoi <- result) {
-    println(s"${quoi.x}, ${quoi.y}")
-
-  }
-
+  println("-------------------------------------")
+  grid.generateGrid()
+  println("-------------------------------------")
+  grid.display
+*/
 
 }
 
@@ -71,13 +88,13 @@ class Grid(x: Int, y: Int) {
   }
 
   def getHeadPos: Position = {
-    var res: Position = new Position(0,0)
+    var res: Position = new Position(0, 0)
     var maxVal: Int = 0;
     for (y <- grid.indices) {
       for (x <- grid(y).indices if (grid(y)(x).getValueInt > maxVal)) {
 
         maxVal = grid(y)(x).getValueInt
-        res = new Position(y,x)
+        res = new Position(y, x)
       }
     }
     res
@@ -140,22 +157,28 @@ class Grid(x: Int, y: Int) {
     val xMove: Int = pos.x - headX
     val yMove: Int = pos.y - headY
 
+    println(s"xMove $xMove et yMove $yMove")
+
     // 1er Mouvement
     if (yMove != 0 || xMove != 0) {
       if (yMove == 0) {
         if (xMove < 0) {
           move(East())
+          println("East")
         }
         else {
           move(West())
+          println("West")
         }
       }
       else {
         if (yMove < 0) {
           move(North())
+          println("North")
         }
         else {
           move(South())
+          println("South")
         }
       }
     }
@@ -184,27 +207,30 @@ class Grid(x: Int, y: Int) {
     val initialMove: Position = initialAvailableCells(randomNb)
 
 
-    val xWay: Int = initialMove.x - posDepart.x
-    val yWay: Int = initialMove.y - posDepart.y
-
     // 1er Mouvement
-    moveWithAdjacentCell(new Position(xWay, yWay))
+    moveWithAdjacentCell(new Position(posDepart.x, posDepart.y))
 
-    // Trouver les nouvelles cellules adjacentes après le 1er mouvement
-    val nextAvailableCells: Array[Position] = adjacentCell()
 
-    if (occupation() > 0.8 && nextAvailableCells.length == 0) {
-      return true
-    }
+    def find(): Boolean = {
 
-    else {
+      // Trouver les nouvelles cellules adjacentes après le 1er mouvement
+      val nextAvailableCells: Array[Position] = adjacentCell()
+
+      if (occupation() > 0.8 && nextAvailableCells.length == 0) {
+        return true
+      }
+
       for (candidat: Position <- nextAvailableCells) {
 
         val saveGrid: ArrayBuffer[ArrayBuffer[Cellule]] = grid
 
-        val nextAvailableCells2: Array[Position] = adjacentCell()
+        moveWithAdjacentCell(candidat)
 
-        if (generateGrid()) {
+
+        display()
+        println("--------------------------------------------------------")
+
+        if (find()) {
           return true
         }
         else {
@@ -213,11 +239,10 @@ class Grid(x: Int, y: Int) {
         }
       }
       return false
-
     }
 
+    return find()
 
   }
-
 
 }
