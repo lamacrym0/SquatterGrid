@@ -5,12 +5,13 @@ import scala.collection.mutable.ArrayBuffer
 object test extends App {
   var gridTest: Grid = new Grid(10, 8)
 
-  gridTest.grid(4)(3).setValueInt(1)
+  //  gridTest.grid(4)(3).setValueInt(1)
+  /*
   gridTest.display()
   println("--------------------------------------------------------------------------")
   gridTest.move(North())
   gridTest.display()
-  /*
+
   val oneOfAdjacentCell: Position = gridTest.adjacentCell()(1)
   println(s"Head x : ${gridTest.getHeadPos.x} et y  ${gridTest.getHeadPos.y}")
   println(s"x : ${oneOfAdjacentCell.x} et y  ${oneOfAdjacentCell.y}")
@@ -20,14 +21,12 @@ object test extends App {
 
   gridTest.display()
   println("--------------------------------------------------------------------------")
-*/
-  /*
-  grid.display()
-  println("-------------------------------------")
-  grid.generateGrid()
-  println("-------------------------------------")
-  grid.display
-*/
+
+  */
+
+  gridTest.generateGrid()
+  gridTest.display()
+
 
 }
 
@@ -62,13 +61,13 @@ class Grid(x: Int, y: Int) {
     }
   }
 
-  def headCanMove():Boolean = {
+  def headCanMove(): Boolean = {
     var headX: Int = getHeadPos.x
     var headY: Int = getHeadPos.y
 
-    var actions:Array[Direction] = Array(North(),South(),East(),West())
+    var actions: Array[Direction] = Array(North(), South(), East(), West())
 
-    for(action <- actions){
+    for (action <- actions) {
       if (!(action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0)) {
         if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
           return false
@@ -94,22 +93,23 @@ class Grid(x: Int, y: Int) {
       return
     }
 
-    if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
+    else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter) {
       return
-
-
-    grid(headY + action.actionY)(headX + action.actionX).setValueInt(grid(headY)(headX).getValueInt + 1)
-    move(action)
+    }
+    else {
+      grid(headY + action.actionY)(headX + action.actionX).setValueInt(grid(headY)(headX).getValueInt + 1)
+      move(action)
+    }
   }
 
   def getHeadPos: Position = {
-    var res: Position = new Position(0,0)
+    var res: Position = new Position(0, 0)
     var maxVal: Int = 0;
     for (y <- grid.indices) {
       for (x <- grid(y).indices if (grid(y)(x).getValueInt > maxVal)) {
 
         maxVal = grid(y)(x).getValueInt
-        res = new Position(x,y)
+        res = new Position(x, y)
       }
     }
     res
@@ -228,6 +228,7 @@ class Grid(x: Int, y: Int) {
 
     def find(): Boolean = {
 
+
       // Trouver les nouvelles cellules adjacentes après le 1er mouvement
       val nextAvailableCells: Array[Position] = adjacentCell()
 
@@ -254,7 +255,6 @@ class Grid(x: Int, y: Int) {
         }
       }
       return false
-
     }
 
     return find()
