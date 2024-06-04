@@ -1,4 +1,5 @@
 package classes
+
 import jdk.jfr.Percentage
 
 
@@ -6,49 +7,47 @@ import scala.collection.mutable.ArrayBuffer
 
 object test extends App {
   val columnGrid: Int = 10
-  val lignGrid: Int = 9
+  val lignGrid: Int = 10
   var gridTest: Grid = new Grid(columnGrid, lignGrid)
 
   var percentMini: Double = 0.8
 
-  var nbObstacles : Int = (math.random() * (0.17 * (columnGrid * lignGrid))).toInt
+  var nbObstacles: Int = (math.random() * (0.17 * (columnGrid * lignGrid))).toInt
 
 
   gridTest.generateGrid(percentMini, nbObstacles)
   gridTest.display()
 
-/*
-  var lign1 : String = "0,0,0,x,x"
-  var lign2 : String = "0,x,0,0,x"
-  var lign3 : String = "0,0,0,0,0"
-  var lign4 : String = "0,0,0,x,0"
-  var lign5 : String = "0,0,0,0,0"
-  var returnlign : String = ";"
+  /*
+    var lign1 : String = "0,0,0,x,x"
+    var lign2 : String = "0,x,0,0,x"
+    var lign3 : String = "0,0,0,0,0"
+    var lign4 : String = "0,0,0,x,0"
+    var lign5 : String = "0,0,0,0,0"
+    var returnlign : String = ";"
 
-  var tab : String = lign1+returnlign+lign2+returnlign+lign3+returnlign+lign4+returnlign+lign5
+    var tab : String = lign1+returnlign+lign2+returnlign+lign3+returnlign+lign4+returnlign+lign5
 
-  var tabDef : Array[String] = tab.split(";")
+    var tabDef : Array[String] = tab.split(";")
 
-  for(lign <- tabDef.indices){
-    val t : Array[String] = tabDef(lign).split(",")
+    for(lign <- tabDef.indices){
+      val t : Array[String] = tabDef(lign).split(",")
 
-    for(col <- t.indices){
+      for(col <- t.indices){
 
-      if(t(col) == "x") {
-        gridTest.grid(lign)(col).isObstacl = true
+        if(t(col) == "x") {
+          gridTest.grid(lign)(col).isObstacl = true
+        }
       }
     }
-  }
-gridTest.grid(2)(1).setValueInt(1)
-gridTest.display()
-println("----------------------------------------------------------------------")
-gridTest.generateGrid(1,0)
-gridTest.display()
-*/
+  gridTest.grid(2)(1).setValueInt(1)
+  gridTest.display()
+  println("----------------------------------------------------------------------")
+  gridTest.generateGrid(1,0)
+  gridTest.display()
+  */
 
 }
-
-
 
 
 class Grid(x: Int, y: Int) {
@@ -56,7 +55,7 @@ class Grid(x: Int, y: Int) {
 
   var grid: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
 
-  var gridSolution : ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
+  var gridSolution: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
 
   for (idy <- 0 until y) {
     grid.addOne(new ArrayBuffer[Cellule]())
@@ -66,17 +65,15 @@ class Grid(x: Int, y: Int) {
   }
 
 
-
-
-  def resetGrid():Unit ={
-    for(y<-grid.indices;x<-grid(y).indices if(grid(y)(x).getValueInt != 0 && grid(y)(x).getValueInt != 1)){
+  def resetGrid(): Unit = {
+    for (y <- grid.indices; x <- grid(y).indices if (grid(y)(x).getValueInt != 0 && grid(y)(x).getValueInt != 1)) {
       grid(y)(x).setValueInt(0)
     }
   }
 
   def display(): Unit = {
     print("\r")
-    var res:String = ""
+    var res: String = ""
     for (y <- grid.indices) {
       for (x <- grid(y).indices) {
         if (!grid(y)(x).isObstacl) {
@@ -294,17 +291,18 @@ class Grid(x: Int, y: Int) {
 
   // Initialiser la postion de départ
   private val posDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
-  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom): Boolean = {
+
+  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer()): Boolean = {
+
 
 
     // Initialisiation sur la grille
-
     grid(posDepart.y)(posDepart.x).setValueInt(1)
-
 
 
     // création d'obstacles imposés
     var counterObstacles: Int = 0
+
     if (nbObstacleInit > 0) {
       while (counterObstacles < nbObstacleInit) {
         val posXObs: Int = (math.random() * grid(0).length - 1).toInt
@@ -323,16 +321,28 @@ class Grid(x: Int, y: Int) {
     }
 
 
-
     // Initialistion direction de départ
-    val initialAvailableCells: Array[Position] = adjacentCell()
-    if (initialAvailableCells.length != 0) {
+    var initialAvailableCells: ArrayBuffer[Position] = adjacentCell().to(ArrayBuffer)
+
+    // Si il reste des cellules ajacentes à tester, si on a fait un appel récursif
+    var saveInitialAvailableCellsArrayFinal: ArrayBuffer[Position] = saveInitialAvailableCellsArray.clone
+
+    if (saveInitialAvailableCellsArray.nonEmpty) {
+      initialAvailableCells = saveInitialAvailableCellsArray
+    }
+
+    if (initialAvailableCells.nonEmpty) {
 
       val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
 
 
-      val initialMove: Position = initialAvailableCells(randomNb)
+      // On sauvegarde les autres cellules adjacentes non utilisees
+      if(saveInitialAvailableCellsArrayFinal.nonEmpty){
+        saveInitialAvailableCellsArrayFinal.remove(randomNb)
+      }
+
       // 1er Mouvement
+      val initialMove: Position = initialAvailableCells(randomNb)
       moveWithAdjacentCell(initialMove)
     }
 
@@ -369,6 +379,8 @@ class Grid(x: Int, y: Int) {
         return false
       }
     }
+
+
     if (find()) {
       println(s"Rempli à: ${(occupation() * 100).toInt} %")
 
@@ -384,24 +396,40 @@ class Grid(x: Int, y: Int) {
       return true
     }
     else {
-      //New Grid
-      fillGridWith("Vide")
+      if (saveInitialAvailableCellsArrayFinal.nonEmpty) {
+        //On efface le chemin testé
+        resetGrid()
 
-
-      // Initialiser une nouvelle position de départ
-      val newDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
-
-      //Appel récursif pour essayer une nouvelle postion de départ
-      if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom)) {
-        return true
+        //Appel récursif pour essayer une nouvelle direction, avec le même point de départ
+        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal)) {
+          return true
+        }
+        else {
+          return false
+        }
       }
 
       else {
-        return false
+        // Si toutes les directions pour un même départ ne donne pas de solution
+        //New Grid
+        fillGridWith("Vide")
+
+        // Initialiser une nouvelle position de départ
+        val newDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
+
+        //Appel récursif pour essayer une nouvelle postion de départ
+        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom)) {
+          return true
+        }
+
+        else {
+          return false
+        }
       }
     }
   }
 }
-object Grids extends ArrayBuffer[Grid]{
+
+object Grids extends ArrayBuffer[Grid] {
 
 }
