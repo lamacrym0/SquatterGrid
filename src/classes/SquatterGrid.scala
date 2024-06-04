@@ -52,9 +52,9 @@ class SquatterGrid() extends PortableApplication{
   override def onKeyDown(keycode: Int): Unit = {
 
     keycode match {
-      case Input.Keys.DOWN =>
-        actionKeyInput(South())
       case Input.Keys.UP =>
+        actionKeyInput(South())
+      case Input.Keys.DOWN =>
         actionKeyInput(North())
       case Input.Keys.LEFT =>
         actionKeyInput(West())
