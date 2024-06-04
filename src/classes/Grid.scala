@@ -1,12 +1,12 @@
 package classes
-
 import jdk.jfr.Percentage
+
 
 import scala.collection.mutable.ArrayBuffer
 
 object test extends App {
   val columnGrid: Int = 10
-  val lignGrid: Int = 12e
+  val lignGrid: Int = 9
   var gridTest: Grid = new Grid(columnGrid, lignGrid)
 
   var percentMini: Double = 0.8
@@ -50,9 +50,13 @@ gridTest.display()
 
 
 
+
 class Grid(x: Int, y: Int) {
+
+
   var grid: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
 
+  var gridSolution : ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
 
   for (idy <- 0 until y) {
     grid.addOne(new ArrayBuffer[Cellule]())
@@ -60,6 +64,7 @@ class Grid(x: Int, y: Int) {
       grid(idy).addOne(new Cellule())
     }
   }
+
 
 
 
@@ -144,6 +149,7 @@ class Grid(x: Int, y: Int) {
     res
   }
 
+
   // Fonction pour calculer le pourcentage d'occupation de la surface par le "Squatter"
   def occupation(): Double = {
     var counter: Double = 0
@@ -168,7 +174,6 @@ class Grid(x: Int, y: Int) {
 
     return ((counter) / (surfaceInit - counterObstacle))
   }
-
 
   // Fonction pour avoir les localisations des différentes cellules adjacentes possibles, pour ce déplacer
   def adjacentCell(): Array[Position] = {
@@ -256,6 +261,7 @@ class Grid(x: Int, y: Int) {
     else return nb1
   }
 
+
   // Fonction pour finir de remplir la grille avec des obstacles ( 0 remplacé par un obstacle)
   def fillGridWith(what: String = "Obstacle"): Unit = {
     for (lign: Int <- grid.indices) {
@@ -276,6 +282,13 @@ class Grid(x: Int, y: Int) {
             }
           }
 
+          case "ReadyToPlay" => {
+            {
+              if(value.getValueInt > 1) {
+                grid(lign)(column).setValueInt(0)
+              }
+            }
+          }
 
         }
 
@@ -285,10 +298,8 @@ class Grid(x: Int, y: Int) {
 
   }
 
-
   // Initialiser la postion de départ
   private val posDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
-
   def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom): Boolean = {
 
 
@@ -297,17 +308,17 @@ class Grid(x: Int, y: Int) {
     grid(posDepart.y)(posDepart.x).setValueInt(1)
 
 
+
     // création d'obstacles imposés
     var counterObstacles: Int = 0
-
     if (nbObstacleInit > 0) {
       while (counterObstacles < nbObstacleInit) {
         val posXObs: Int = (math.random() * grid(0).length - 1).toInt
+
+
         val posYObs: Int = (math.random() * grid.length - 1).toInt
 
-
         val value: Cellule = grid(posYObs)(posXObs)
-
         if (!value.isObstacl && value.getValueInt < 1) {
 
           grid(posYObs)(posXObs).isObstacl = true
@@ -318,18 +329,19 @@ class Grid(x: Int, y: Int) {
     }
 
 
+
     // Initialistion direction de départ
     val initialAvailableCells: Array[Position] = adjacentCell()
-
     if (initialAvailableCells.length != 0) {
+
       val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
 
+
       val initialMove: Position = initialAvailableCells(randomNb)
-
-
       // 1er Mouvement
       moveWithAdjacentCell(initialMove)
     }
+
 
 
     def find(): Boolean = {
@@ -365,12 +377,18 @@ class Grid(x: Int, y: Int) {
         return false
       }
     }
-
     if (find()) {
       println(s"Rempli à: ${(occupation() * 100).toInt} %")
 
       //On remplit les trous avec la fonction ci-dessous
       fillGridWith()
+
+      //On sauvegarde la Solution
+      gridSolution = grid.clone
+
+      //On efface le chemin
+      fillGridWith("ReadyToPlay")
+
       return true
     }
     else {
@@ -391,5 +409,7 @@ class Grid(x: Int, y: Int) {
       }
     }
   }
+
+
 
 }
