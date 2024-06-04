@@ -69,28 +69,31 @@ class Grid(x: Int, y: Int) {
 
 
   def resetGrid():Unit ={
-    for(y<-grid.indices;x<-grid(y).indices if(grid(y)(x).getValueInt != 0 || grid(y)(x).getValueInt != 1)){
+    for(y<-grid.indices;x<-grid(y).indices if(grid(y)(x).getValueInt != 0 && grid(y)(x).getValueInt != 1)){
       grid(y)(x).setValueInt(0)
     }
   }
 
   def display(): Unit = {
     print("\r")
+    var res:String = ""
     for (y <- grid.indices) {
       for (x <- grid(y).indices) {
         if (!grid(y)(x).isObstacl) {
           if (grid(y)(x).haveSquatter) {
-            print(grid(y)(x).getValueInt + " ")
+            res += grid(y)(x).getValueInt + " "
           } else {
-            print("0 ")
+            res += "0 "
           }
+
         }
         else {
-          print("X ")
+          res += "X "
         }
       }
-      print("\n")
+      res += "\n"
     }
+    print(res)
   }
 
   def headCanMove(): Boolean = {
@@ -281,15 +284,6 @@ class Grid(x: Int, y: Int) {
               grid(lign)(column).setValueInt(0)
             }
           }
-
-          case "ReadyToPlay" => {
-            {
-              if(value.getValueInt > 1) {
-                grid(lign)(column).setValueInt(0)
-              }
-            }
-          }
-
         }
 
       }
@@ -342,8 +336,6 @@ class Grid(x: Int, y: Int) {
       moveWithAdjacentCell(initialMove)
     }
 
-
-
     def find(): Boolean = {
 
 
@@ -387,7 +379,7 @@ class Grid(x: Int, y: Int) {
       gridSolution = grid.clone
 
       //On efface le chemin
-      fillGridWith("ReadyToPlay")
+      resetGrid()
 
       return true
     }
@@ -409,7 +401,7 @@ class Grid(x: Int, y: Int) {
       }
     }
   }
-
-
+}
+object Grids extends ArrayBuffer[Grid]{
 
 }
