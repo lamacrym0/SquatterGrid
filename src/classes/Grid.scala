@@ -3,8 +3,8 @@ import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
 import jdk.jfr.Percentage
 
-
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
 
 object test extends App {
   val columnGrid: Int = 10
@@ -364,7 +364,8 @@ class Grid(x: Int, y: Int) {
 
 
       // Trouver les nouvelles cellules adjacentes après le 1er mouvement
-      val nextAvailableCells: Array[Position] = adjacentCell()
+      // On mélange les solutions, pour éviter qu'il tourne toujours de la même manière
+      val nextAvailableCells: Array[Position] = Random.shuffle(adjacentCell().toSeq).toArray
 
       if (occupation() > percentageCoverGrid && nextAvailableCells.length == 0) {
         return true
