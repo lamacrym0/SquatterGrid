@@ -23,8 +23,6 @@ class SquatterGrid() extends PortableApplication{
   def restartCmdGame(): Unit = {
     println(s"taille: $line x $column, obstacles: $obsacl")
     grid.resetGrid()
-
-
     grid.display()
   }
 
@@ -33,6 +31,7 @@ class SquatterGrid() extends PortableApplication{
     this.column = column
     println(s"taille: $line x $column, obstacles: $obsacl")
     grid = new Grid(line, column)
+
     var isGenerer: Boolean = false
     while (!isGenerer) {
       try {
@@ -46,7 +45,7 @@ class SquatterGrid() extends PortableApplication{
   }
 
   override def onInit(): Unit = {
-    setTitle("Hello World - mui 2024")
+    setTitle("Squatter Grid")
 
   }
 
@@ -63,9 +62,9 @@ class SquatterGrid() extends PortableApplication{
         actionKeyInput(East())
       case Input.Keys.SPACE =>
         if (!grid.headCanMove()) {
+          println(!grid.gridIsFinish)
 
-          if (!grid.gridIsFinish) {
-
+          if (grid.gridIsFinish) {
             if(nbLvl % 6 == 0){
               line += 1
               nbLvl = 0
@@ -75,6 +74,8 @@ class SquatterGrid() extends PortableApplication{
             }
             if(nbLvl %2 ==0)
               obsacl += 1
+
+            println(nbLvl)
             stratCmdGame(line,column,obsacl)
           }else {
             restartCmdGame()
@@ -109,5 +110,6 @@ class SquatterGrid() extends PortableApplication{
     g.setBackgroundColor(Color.valueOf("48d055"))
     g.drawFPS()
     g.drawSchoolLogo()
+    grid.displayWin(g)
   }
 }

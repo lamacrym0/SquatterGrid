@@ -1,5 +1,6 @@
 package classes
-
+import ch.hevs.gdx2d.lib.GdxGraphics
+import com.badlogic.gdx.graphics.Color
 import jdk.jfr.Percentage
 
 
@@ -18,34 +19,34 @@ object test extends App {
   gridTest.generateGrid(percentMini, nbObstacles)
   gridTest.display()
 
-  /*
-    var lign1 : String = "0,0,0,x,x"
-    var lign2 : String = "0,x,0,0,x"
-    var lign3 : String = "0,0,0,0,0"
-    var lign4 : String = "0,0,0,x,0"
-    var lign5 : String = "0,0,0,0,0"
-    var returnlign : String = ";"
+/*
+  var lign1 : String = "0,0,0,x,x"
+  var lign2 : String = "0,x,0,0,x"
+  var lign3 : String = "0,0,0,0,0"
+  var lign4 : String = "0,0,0,x,0"
+  var lign5 : String = "0,0,0,0,0"
+  var returnlign : String = ";"
 
-    var tab : String = lign1+returnlign+lign2+returnlign+lign3+returnlign+lign4+returnlign+lign5
+  var tab : String = lign1+returnlign+lign2+returnlign+lign3+returnlign+lign4+returnlign+lign5
 
-    var tabDef : Array[String] = tab.split(";")
+  var tabDef : Array[String] = tab.split(";")
 
-    for(lign <- tabDef.indices){
-      val t : Array[String] = tabDef(lign).split(",")
+  for(lign <- tabDef.indices){
+    val t : Array[String] = tabDef(lign).split(",")
 
-      for(col <- t.indices){
+    for(col <- t.indices){
 
-        if(t(col) == "x") {
-          gridTest.grid(lign)(col).isObstacl = true
-        }
+      if(t(col) == "x") {
+        gridTest.grid(lign)(col).isObstacl = true
       }
     }
-  gridTest.grid(2)(1).setValueInt(1)
-  gridTest.display()
-  println("----------------------------------------------------------------------")
-  gridTest.generateGrid(1,0)
-  gridTest.display()
-  */
+  }
+gridTest.grid(2)(1).setValueInt(1)
+gridTest.display()
+println("----------------------------------------------------------------------")
+gridTest.generateGrid(1,0)
+gridTest.display()
+*/
 
 }
 
@@ -71,6 +72,22 @@ class Grid(x: Int, y: Int) {
     }
   }
 
+
+  def displayWin(g: GdxGraphics):Unit = {
+
+    val width:Int = g.getScreenHeight / (grid.length + 2)
+    val xStart:Int = width + width/2
+    val yStart:Int = width + width/2
+    for(y<-grid.indices;x<-grid(y).indices){
+      if(grid(y)(x).isObstacl){
+        g.drawFilledRectangle( xStart+ x * width,yStart + y * width,width,width,0,Color.BLACK)
+      } else if(grid(y)(x).getValueInt > 0){
+        g.drawFilledRectangle(xStart+ x * width,yStart + y * width,width,width,0,Color.BLUE)
+      } else {
+        g.drawFilledRectangle(xStart + x * width,yStart + y * width,width,width,0,Color.GRAY)
+      }
+    }
+  }
   def display(): Unit = {
     print("\r")
     var res: String = ""
@@ -111,10 +128,8 @@ class Grid(x: Int, y: Int) {
   }
 
   def gridIsFinish: Boolean = {
-    for (y <- grid.indices) {
-      for (x <- grid(y).indices if (grid(y)(x).getValueInt == 0)) {
-        return false
-      }
+    for (y <- grid.indices;x <- grid(y).indices if (grid(y)(x).getValueInt == 0 && !grid(y)(x).isObstacl)) {
+      return false
     }
     true
   }
@@ -302,7 +317,6 @@ class Grid(x: Int, y: Int) {
 
     // création d'obstacles imposés
     var counterObstacles: Int = 0
-
     if (nbObstacleInit > 0) {
       while (counterObstacles < nbObstacleInit) {
         val posXObs: Int = (math.random() * grid(0).length - 1).toInt
