@@ -3,6 +3,7 @@ import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
 import jdk.jfr.Percentage
 
+import java.io.{File, FileInputStream, FileNotFoundException, FileOutputStream, IOException, ObjectInputStream, ObjectOutputStream}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
@@ -17,7 +18,8 @@ object test extends App {
 
 
   gridTest.generateGrid(percentMini, nbObstacles)
-  gridTest.display()
+  println("-----------------------------")
+
 
 /*
   var lign1 : String = "0,0,0,x,x"
@@ -51,7 +53,7 @@ gridTest.display()
 }
 
 
-class Grid(x: Int, y: Int) {
+class Grid(x: Int, y: Int) extends Serializable {
 
 
   var grid: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
@@ -88,14 +90,14 @@ class Grid(x: Int, y: Int) {
       }
     }
   }
-  def display(): Unit = {
+  def display(gridIn : ArrayBuffer[ArrayBuffer[Cellule]] = grid): Unit = {
     print("\r")
     var res: String = ""
-    for (y <- grid.indices) {
-      for (x <- grid(y).indices) {
-        if (!grid(y)(x).isObstacl) {
-          if (grid(y)(x).haveSquatter) {
-            res += grid(y)(x).getValueInt + " "
+    for (y <- gridIn.indices) {
+      for (x <- gridIn(y).indices) {
+        if (!gridIn(y)(x).isObstacl) {
+          if (gridIn(y)(x).haveSquatter) {
+            res += gridIn(y)(x).getValueInt + " "
           } else {
             res += "0 "
           }
@@ -109,6 +111,8 @@ class Grid(x: Int, y: Int) {
     }
     print(res)
   }
+
+  
 
   def headCanMove(): Boolean = {
     var headX: Int = getHeadPos.x
@@ -307,9 +311,9 @@ class Grid(x: Int, y: Int) {
   // Initialiser la postion de départ
   private val posDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
-  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer()): Boolean = {
+  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer()): GridValid = {
 
-
+    var result : GridValid = new GridValid(false,null,null)
 
     // Initialisiation sur la grille
     grid(posDepart.y)(posDepart.x).setValueInt(1)
@@ -403,12 +407,17 @@ class Grid(x: Int, y: Int) {
       fillGridWith()
 
       //On sauvegarde la Solution
-      gridSolution = grid.clone
+      gridSolution = grid.clone()
+
+      display(gridSolution)
+      result = new GridValid(true,grid,gridSolution)
+      result.save(result)
+      println("------------------------------------------------------")
 
       //On efface le chemin
       resetGrid()
 
-      return true
+      return new GridValid(true,grid,gridSolution)
     }
     else {
       if (saveInitialAvailableCellsArrayFinal.nonEmpty) {
@@ -416,11 +425,11 @@ class Grid(x: Int, y: Int) {
         resetGrid()
 
         //Appel récursif pour essayer une nouvelle direction, avec le même point de départ
-        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal)) {
-          return true
+        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal).isPossible) {
+          return new GridValid(true,grid,gridSolution)
         }
         else {
-          return false
+          return new GridValid(false,grid,gridSolution)
         }
       }
 
@@ -433,18 +442,94 @@ class Grid(x: Int, y: Int) {
         val newDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
         //Appel récursif pour essayer une nouvelle postion de départ
-        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom)) {
-          return true
+        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom).isPossible) {
+          return new GridValid(true,grid,gridSolution)
         }
 
         else {
-          return false
+          return new GridValid(false,grid,gridSolution)
         }
       }
     }
   }
 }
 
-object Grids extends ArrayBuffer[Grid] {
+class GridValid (var isPossible: Boolean ,var playGrid: ArrayBuffer[ArrayBuffer[Cellule]], var solution : ArrayBuffer[ArrayBuffer[Cellule]]) extends Serializable{
+
+
+  // Fonction pour sauvegarder un GridValid
+  def save(db: GridValid,fileName: String = "data\\saveGrid.txt"): Unit = {
+    try {
+      var sv = new ObjectOutputStream(new FileOutputStream(new File(fileName), false))
+      sv.writeObject(db)
+      sv.close()
+    }
+    catch {
+      case e: FileNotFoundException =>
+        System.err.println("Bad output file " + fileName + " !\n")
+        e.printStackTrace()
+        System.exit(-1)
+    }
+  }
+
+  // Fonction pour charger un GridValid
+  def load(fileName: String = "data\\saveGrid.txt"): GridValid = {
+
+    var db: GridValid = new GridValid(false,null,null)
+
+    try {
+
+      val load = new ObjectInputStream(new FileInputStream(fileName))
+      db = load.readObject().asInstanceOf[GridValid]
+      load.close()
+
+
+    }
+    catch {
+
+      case e: FileNotFoundException =>
+        System.err.println("Bad input file " + fileName + " !\n")
+        e.printStackTrace()
+        System.exit(-1)
+
+
+      case e: IOException =>
+        System.err.println("Error reading file " + " !\n")
+        e.printStackTrace()
+        System.exit(-1)
+    }
+
+    return db
+  }
+
+  // Fonction pour afficher
+  def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = solution): Unit = {
+    println("-------------------------------------------------------------------")
+    print("\r")
+    var res: String = ""
+    for (y <- gridIn.indices) {
+      for (x <- gridIn(y).indices) {
+        if (!gridIn(y)(x).isObstacl) {
+          if (gridIn(y)(x).haveSquatter) {
+            res += gridIn(y)(x).getValueInt + " "
+          } else {
+            res += "0 "
+          }
+
+        }
+        else {
+          res += "X "
+        }
+      }
+      res += "\n"
+    }
+    print(res)
+    println("-------------------------------------------------------------------")
+  }
+
+
+}
+
+object Grids extends ArrayBuffer[Grid]  {
 
 }

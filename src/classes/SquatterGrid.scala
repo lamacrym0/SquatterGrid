@@ -6,10 +6,13 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 
+import scala.collection.mutable.ArrayBuffer
+
 
 object application extends App{
   var game :SquatterGrid = new SquatterGrid()
   game.stratCmdGame(3,3,0)
+
 }
 
 class SquatterGrid() extends PortableApplication{
@@ -18,7 +21,8 @@ class SquatterGrid() extends PortableApplication{
   var line:Int = 0
   var column:Int = 0
   var obsacl:Int = 0
-  //var newGameButton = new
+  var TheGrid: GridValid = new GridValid(false,null,null)
+  //var newGameButton
 
   def restartCmdGame(): Unit = {
     println(s"taille: $line x $column, obstacles: $obsacl")
@@ -35,7 +39,9 @@ class SquatterGrid() extends PortableApplication{
     var isGenerer: Boolean = false
     while (!isGenerer) {
       try {
-        grid.generateGrid(nbObstacleInit = obstacl)
+
+        grid.generateGrid(percentageCoverGrid = math.random, nbObstacleInit = (math.random() * obstacl).toInt)
+
         isGenerer = true
         Grids.addOne(grid)
       }
@@ -43,6 +49,8 @@ class SquatterGrid() extends PortableApplication{
 
     grid.display()
   }
+
+
 
   override def onInit(): Unit = {
     setTitle("Squatter Grid")
@@ -60,6 +68,7 @@ class SquatterGrid() extends PortableApplication{
         actionKeyInput(West())
       case Input.Keys.RIGHT =>
         actionKeyInput(East())
+
       case Input.Keys.SPACE =>
         if (!grid.headCanMove()) {
           println(!grid.gridIsFinish)
@@ -73,7 +82,7 @@ class SquatterGrid() extends PortableApplication{
               column += 1
             }
             if(nbLvl %2 ==0)
-              obsacl += 1
+            obsacl += 1
 
             println(nbLvl)
             stratCmdGame(line,column,obsacl)
@@ -82,6 +91,9 @@ class SquatterGrid() extends PortableApplication{
           }
 
         }
+
+        // Touche pour voir la solution dans la console de la grille
+      case Input.Keys.S => TheGrid.display(TheGrid.load().solution)
 
       case _ =>
     }

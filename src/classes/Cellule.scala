@@ -1,6 +1,6 @@
 package classes
 
-class Cellule (var isObstacl: Boolean = false, var haveSquatter: Boolean = false, private var valueInt: Int = 0)  {
+class Cellule (var isObstacl: Boolean = false, var haveSquatter: Boolean = false, private var valueInt: Int = 0) extends Serializable  {
   def getValueInt:Int = valueInt
   def setValueInt(value:Int):Unit = {
     valueInt = value
