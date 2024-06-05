@@ -1,6 +1,7 @@
 package classes
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import jdk.jfr.Percentage
 
 import java.io.{File, FileInputStream, FileNotFoundException, FileOutputStream, IOException, ObjectInputStream, ObjectOutputStream}
@@ -17,8 +18,10 @@ object test extends App {
   var nbObstacles: Int = (math.random() * (0.17 * (columnGrid * lignGrid))).toInt
 
 
-  gridTest.generateGrid(percentMini, nbObstacles)
+  //gridTest.display(gridTest.generateGrid(percentMini, nbObstacles).solution)
   println("-----------------------------")
+  gridTest.generateGrid(percentMini, nbObstacles)
+  gridTest.display(gridTest.grid)
 
 
 /*
@@ -75,21 +78,24 @@ class Grid(x: Int, y: Int) extends Serializable {
   }
 
 
-  def displayWin(g: GdxGraphics):Unit = {
+  def displayWin(g: GdxGraphics, in : ArrayBuffer[ArrayBuffer[Cellule]] = grid,seeSol : Boolean = false):Unit = {
 
-    val width:Int = g.getScreenHeight / (grid.length + 2)
+    val width:Int = g.getScreenHeight / (in.length + 2)
     val xStart:Int = width + width/2
     val yStart:Int = width + width/2
-    for(y<-grid.indices;x<-grid(y).indices){
-      if(grid(y)(x).isObstacl){
+    for(y<-in.indices;x<-in(y).indices){
+
+      if(in(y)(x).isObstacl){
         g.drawFilledRectangle( xStart+ x * width,yStart + y * width,width,width,0,Color.BLACK)
-      } else if(grid(y)(x).getValueInt > 0){
+      } else if(in(y)(x).getValueInt > 0){
         g.drawFilledRectangle(xStart+ x * width,yStart + y * width,width,width,0,Color.BLUE)
+
       } else {
         g.drawFilledRectangle(xStart + x * width,yStart + y * width,width,width,0,Color.GRAY)
       }
     }
   }
+
   def display(gridIn : ArrayBuffer[ArrayBuffer[Cellule]] = grid): Unit = {
     print("\r")
     var res: String = ""
@@ -308,10 +314,23 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   }
 
+  def cloneGrid (): Unit = {
+    for(lign  : Int <- grid.indices){
+      val lignArrayB : ArrayBuffer[Cellule] = new ArrayBuffer[Cellule]()
+      for(column : Int <- grid(lign).indices){
+       val save : Cellule = grid(lign)(column)
+       lignArrayB.addOne(new Cellule(save.isObstacl,save.haveSquatter,save.getValueInt))
+      }
+      gridSolution.addOne(lignArrayB)
+    }
+  }
+
+
+
   // Initialiser la postion de départ
   private val posDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
-  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer()): GridValid = {
+  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer()): Boolean = {
 
     var result : GridValid = new GridValid(false,null,null)
 
@@ -407,17 +426,12 @@ class Grid(x: Int, y: Int) extends Serializable {
       fillGridWith()
 
       //On sauvegarde la Solution
-      gridSolution = grid.clone()
-
-      display(gridSolution)
-      result = new GridValid(true,grid,gridSolution)
-      result.save(result)
-      println("------------------------------------------------------")
+      cloneGrid()
 
       //On efface le chemin
-      resetGrid()
+     resetGrid()
 
-      return new GridValid(true,grid,gridSolution)
+      return true
     }
     else {
       if (saveInitialAvailableCellsArrayFinal.nonEmpty) {
@@ -425,11 +439,11 @@ class Grid(x: Int, y: Int) extends Serializable {
         resetGrid()
 
         //Appel récursif pour essayer une nouvelle direction, avec le même point de départ
-        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal).isPossible) {
-          return new GridValid(true,grid,gridSolution)
+        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal)) {
+          return true
         }
         else {
-          return new GridValid(false,grid,gridSolution)
+          return true
         }
       }
 
@@ -442,12 +456,12 @@ class Grid(x: Int, y: Int) extends Serializable {
         val newDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
         //Appel récursif pour essayer une nouvelle postion de départ
-        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom).isPossible) {
-          return new GridValid(true,grid,gridSolution)
+        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom)) {
+          return true
         }
 
         else {
-          return new GridValid(false,grid,gridSolution)
+          return false
         }
       }
     }
@@ -504,7 +518,8 @@ class GridValid (var isPossible: Boolean ,var playGrid: ArrayBuffer[ArrayBuffer[
 
   // Fonction pour afficher
   def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = solution): Unit = {
-    println("-------------------------------------------------------------------")
+    println("---------------------------SOLUTION-----------------------------")
+
     print("\r")
     var res: String = ""
     for (y <- gridIn.indices) {
