@@ -15,7 +15,7 @@ object application extends App{
 
 }
 
-class SquatterGrid() extends PortableApplication{
+class SquatterGrid() extends PortableApplication(1920,1080){
   var nbLvl:Int = 1
   var grid:Grid = null
   var line:Int = 0
@@ -60,9 +60,9 @@ class SquatterGrid() extends PortableApplication{
   override def onKeyDown(keycode: Int): Unit = {
 
     keycode match {
-      case Input.Keys.UP =>
-        actionKeyInput(South())
       case Input.Keys.DOWN =>
+        actionKeyInput(South())
+      case Input.Keys.UP =>
         actionKeyInput(North())
       case Input.Keys.LEFT =>
         actionKeyInput(West())

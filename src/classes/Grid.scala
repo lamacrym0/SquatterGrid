@@ -1,8 +1,6 @@
 package classes
-
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import jdk.jfr.Percentage
 
 import java.io.{File, FileInputStream, FileNotFoundException, FileOutputStream, IOException, ObjectInputStream, ObjectOutputStream}
@@ -82,17 +80,16 @@ class Grid(x: Int, y: Int) extends Serializable {
   def displayWin(g: GdxGraphics, in: ArrayBuffer[ArrayBuffer[Cellule]] = grid, seeSol: Boolean = false): Unit = {
 
     val width: Int = g.getScreenHeight / (in.length + 2)
-    val xStart: Int = width + width / 2
+    val xStart: Int = g.getScreenWidth / 2 - width * in.length /2  + width/2
     val yStart: Int = width + width / 2
     for (y <- in.indices; x <- in(y).indices) {
 
       if (in(y)(x).isObstacl) {
-        g.drawFilledRectangle(xStart + x * width, yStart + y * width, width, width, 0, Color.BLACK)
+        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.valueOf("48d055"))
       } else if (in(y)(x).getValueInt > 0) {
-        g.drawFilledRectangle(xStart + x * width, yStart + y * width, width, width, 0, Color.BLUE)
-
+        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight -  (yStart + y * width), width, width, 0, Color.YELLOW)
       } else {
-        g.drawFilledRectangle(xStart + x * width, yStart + y * width, width, width, 0, Color.GRAY)
+        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.GRAY)
       }
     }
   }
@@ -119,6 +116,7 @@ class Grid(x: Int, y: Int) extends Serializable {
     print(res)
   }
 
+  
 
   def headCanMove(): Boolean = {
     var headX: Int = getHeadPos.x
