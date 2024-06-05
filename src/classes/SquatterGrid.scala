@@ -22,6 +22,7 @@ class SquatterGrid() extends PortableApplication(1920,1080){
   var column:Int = 0
   var obsacl:Int = 0
   var TheGrid: GridValid = new GridValid(false,null,null)
+  var solutionVisible : Boolean = false
   //var newGameButton
 
   def restartCmdGame(): Unit = {
@@ -39,8 +40,19 @@ class SquatterGrid() extends PortableApplication(1920,1080){
     var isGenerer: Boolean = false
     while (!isGenerer) {
       try {
+        val miniArea : Double = 0.5
+        var area : Double =  math.random
+        if(area < miniArea){
+          area = miniArea
+        }
+        val miniObs : Int = 1
+        val maxObs : Int = (line * column * 0.1).toInt
+        var nbObs : Int =  (math.random * maxObs).toInt
+        if(nbObs<miniObs){
+          nbObs = miniObs
+        }
 
-        grid.generateGrid(percentageCoverGrid = math.random, nbObstacleInit = (math.random() * obstacl).toInt)
+        grid.generateGrid(percentageCoverGrid = area, nbObstacleInit = nbObs)
 
         isGenerer = true
         Grids.addOne(grid)
@@ -70,6 +82,7 @@ class SquatterGrid() extends PortableApplication(1920,1080){
         actionKeyInput(East())
 
       case Input.Keys.SPACE =>
+
         if (!grid.headCanMove()) {
           println(!grid.gridIsFinish)
 
@@ -93,7 +106,11 @@ class SquatterGrid() extends PortableApplication(1920,1080){
         }
 
         // Touche pour voir la solution dans la console de la grille
-      case Input.Keys.S => TheGrid.display(TheGrid.load().solution)
+      case Input.Keys.S => TheGrid.display(grid.gridSolution)
+      if(!solutionVisible){
+        solutionVisible = true
+      }
+      else solutionVisible = false
 
       case _ =>
     }
@@ -123,5 +140,6 @@ class SquatterGrid() extends PortableApplication(1920,1080){
     g.drawFPS()
     g.drawSchoolLogo()
     grid.displayWin(g)
+
   }
 }
