@@ -1,4 +1,5 @@
 package classes
+
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -24,34 +25,34 @@ object test extends App {
   gridTest.display(gridTest.grid)
 
 
-/*
-  var lign1 : String = "0,0,0,x,x"
-  var lign2 : String = "0,x,0,0,x"
-  var lign3 : String = "0,0,0,0,0"
-  var lign4 : String = "0,0,0,x,0"
-  var lign5 : String = "0,0,0,0,0"
-  var returnlign : String = ";"
+  /*
+    var lign1 : String = "0,0,0,x,x"
+    var lign2 : String = "0,x,0,0,x"
+    var lign3 : String = "0,0,0,0,0"
+    var lign4 : String = "0,0,0,x,0"
+    var lign5 : String = "0,0,0,0,0"
+    var returnlign : String = ";"
 
-  var tab : String = lign1+returnlign+lign2+returnlign+lign3+returnlign+lign4+returnlign+lign5
+    var tab : String = lign1+returnlign+lign2+returnlign+lign3+returnlign+lign4+returnlign+lign5
 
-  var tabDef : Array[String] = tab.split(";")
+    var tabDef : Array[String] = tab.split(";")
 
-  for(lign <- tabDef.indices){
-    val t : Array[String] = tabDef(lign).split(",")
+    for(lign <- tabDef.indices){
+      val t : Array[String] = tabDef(lign).split(",")
 
-    for(col <- t.indices){
+      for(col <- t.indices){
 
-      if(t(col) == "x") {
-        gridTest.grid(lign)(col).isObstacl = true
+        if(t(col) == "x") {
+          gridTest.grid(lign)(col).isObstacl = true
+        }
       }
     }
-  }
-gridTest.grid(2)(1).setValueInt(1)
-gridTest.display()
-println("----------------------------------------------------------------------")
-gridTest.generateGrid(1,0)
-gridTest.display()
-*/
+  gridTest.grid(2)(1).setValueInt(1)
+  gridTest.display()
+  println("----------------------------------------------------------------------")
+  gridTest.generateGrid(1,0)
+  gridTest.display()
+  */
 
 }
 
@@ -78,25 +79,25 @@ class Grid(x: Int, y: Int) extends Serializable {
   }
 
 
-  def displayWin(g: GdxGraphics, in : ArrayBuffer[ArrayBuffer[Cellule]] = grid,seeSol : Boolean = false):Unit = {
+  def displayWin(g: GdxGraphics, in: ArrayBuffer[ArrayBuffer[Cellule]] = grid, seeSol: Boolean = false): Unit = {
 
-    val width:Int = g.getScreenHeight / (in.length + 2)
-    val xStart:Int = width + width/2
-    val yStart:Int = width + width/2
-    for(y<-in.indices;x<-in(y).indices){
+    val width: Int = g.getScreenHeight / (in.length + 2)
+    val xStart: Int = width + width / 2
+    val yStart: Int = width + width / 2
+    for (y <- in.indices; x <- in(y).indices) {
 
-      if(in(y)(x).isObstacl){
-        g.drawFilledRectangle( xStart+ x * width,yStart + y * width,width,width,0,Color.BLACK)
-      } else if(in(y)(x).getValueInt > 0){
-        g.drawFilledRectangle(xStart+ x * width,yStart + y * width,width,width,0,Color.BLUE)
+      if (in(y)(x).isObstacl) {
+        g.drawFilledRectangle(xStart + x * width, yStart + y * width, width, width, 0, Color.BLACK)
+      } else if (in(y)(x).getValueInt > 0) {
+        g.drawFilledRectangle(xStart + x * width, yStart + y * width, width, width, 0, Color.BLUE)
 
       } else {
-        g.drawFilledRectangle(xStart + x * width,yStart + y * width,width,width,0,Color.GRAY)
+        g.drawFilledRectangle(xStart + x * width, yStart + y * width, width, width, 0, Color.GRAY)
       }
     }
   }
 
-  def display(gridIn : ArrayBuffer[ArrayBuffer[Cellule]] = grid): Unit = {
+  def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = grid): Unit = {
     print("\r")
     var res: String = ""
     for (y <- gridIn.indices) {
@@ -118,7 +119,6 @@ class Grid(x: Int, y: Int) extends Serializable {
     print(res)
   }
 
-  
 
   def headCanMove(): Boolean = {
     var headX: Int = getHeadPos.x
@@ -138,7 +138,7 @@ class Grid(x: Int, y: Int) extends Serializable {
   }
 
   def gridIsFinish: Boolean = {
-    for (y <- grid.indices;x <- grid(y).indices if (grid(y)(x).getValueInt == 0 && !grid(y)(x).isObstacl)) {
+    for (y <- grid.indices; x <- grid(y).indices if (grid(y)(x).getValueInt == 0 && !grid(y)(x).isObstacl)) {
       return false
     }
     true
@@ -314,17 +314,18 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   }
 
-  def cloneGrid (): Unit = {
-    for(lign  : Int <- grid.indices){
-      val lignArrayB : ArrayBuffer[Cellule] = new ArrayBuffer[Cellule]()
-      for(column : Int <- grid(lign).indices){
-       val save : Cellule = grid(lign)(column)
-       lignArrayB.addOne(new Cellule(save.isObstacl,save.haveSquatter,save.getValueInt))
+
+  // Méthode pour faire une copie de la solution, afin d'éviter le pb avec la methode .clone
+  def cloneGrid(): Unit = {
+    for (lign: Int <- grid.indices) {
+      val lignArrayB: ArrayBuffer[Cellule] = new ArrayBuffer[Cellule]()
+      for (column: Int <- grid(lign).indices) {
+        val save: Cellule = grid(lign)(column)
+        lignArrayB.addOne(new Cellule(save.isObstacl, save.haveSquatter, save.getValueInt))
       }
       gridSolution.addOne(lignArrayB)
     }
   }
-
 
 
   // Initialiser la postion de départ
@@ -332,7 +333,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer()): Boolean = {
 
-    var result : GridValid = new GridValid(false,null,null)
+    var result: GridValid = new GridValid(false, null, null)
 
     // Initialisiation sur la grille
     grid(posDepart.y)(posDepart.x).setValueInt(1)
@@ -374,7 +375,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
 
       // On sauvegarde les autres cellules adjacentes non utilisees
-      if(saveInitialAvailableCellsArrayFinal.nonEmpty){
+      if (saveInitialAvailableCellsArrayFinal.nonEmpty) {
         saveInitialAvailableCellsArrayFinal.remove(randomNb)
       }
 
@@ -429,7 +430,7 @@ class Grid(x: Int, y: Int) extends Serializable {
       cloneGrid()
 
       //On efface le chemin
-     resetGrid()
+      resetGrid()
 
       return true
     }
@@ -468,11 +469,11 @@ class Grid(x: Int, y: Int) extends Serializable {
   }
 }
 
-class GridValid (var isPossible: Boolean ,var playGrid: ArrayBuffer[ArrayBuffer[Cellule]], var solution : ArrayBuffer[ArrayBuffer[Cellule]]) extends Serializable{
+class GridValid(var isPossible: Boolean, var playGrid: ArrayBuffer[ArrayBuffer[Cellule]], var solution: ArrayBuffer[ArrayBuffer[Cellule]]) extends Serializable {
 
 
   // Fonction pour sauvegarder un GridValid
-  def save(db: GridValid,fileName: String = "data\\saveGrid.txt"): Unit = {
+  def save(db: GridValid, fileName: String = "data\\saveGrid.txt"): Unit = {
     try {
       var sv = new ObjectOutputStream(new FileOutputStream(new File(fileName), false))
       sv.writeObject(db)
@@ -489,7 +490,7 @@ class GridValid (var isPossible: Boolean ,var playGrid: ArrayBuffer[ArrayBuffer[
   // Fonction pour charger un GridValid
   def load(fileName: String = "data\\saveGrid.txt"): GridValid = {
 
-    var db: GridValid = new GridValid(false,null,null)
+    var db: GridValid = new GridValid(false, null, null)
 
     try {
 
@@ -545,6 +546,6 @@ class GridValid (var isPossible: Boolean ,var playGrid: ArrayBuffer[ArrayBuffer[
 
 }
 
-object Grids extends ArrayBuffer[Grid]  {
+object Grids extends ArrayBuffer[Grid] {
 
 }
