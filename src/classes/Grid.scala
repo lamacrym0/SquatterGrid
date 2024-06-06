@@ -14,20 +14,12 @@ object test extends App {
 
 var test : Grid = new Grid(10,8)
 
-for(i <- 0 to 5){
+  for(i <- 0 to 5){
 
-  test.generateGrid()
+    test.generateGrid()
 
-  Grids.addOne(test)
-
-
-}
-
-  Grids.save()
-
-
-
-
+    Grids.addOne(test)
+  }
 }
 
 
@@ -52,17 +44,68 @@ class Grid(x: Int, y: Int) extends Serializable {
     }
   }
 
+  def displayMove(g:GdxGraphics,oldGrid:Grid,action:Direction,x:Int,y:Int,nbMove:Int,width:Int):Boolean = {
 
-  def displayWin(g: GdxGraphics, in: ArrayBuffer[ArrayBuffer[Cellule]] = grid): Unit = {
-
-    val width: Int = g.getScreenHeight / (in.length + 2)
-    val xStart: Int = g.getScreenWidth / 2 - width * in.length /2  + width/2
+    val xStart: Int = g.getScreenWidth / 2 - width * oldGrid.grid.length / 2 + width / 2
     val yStart: Int = width + width / 2
-    for (y <- in.indices; x <- in(y).indices) {
 
-      if (in(y)(x).isObstacl) {
+    displayWin(g,oldGrid)
+
+    if(action.isInstanceOf[South] || action.isInstanceOf[East]){
+      if (x >= (nbMove) * width || y >= nbMove * width) {
+        displayWin(g)
+        return true
+      }
+
+      if(action.isInstanceOf[South]){
+        var headPos:Position = oldGrid.getHeadPos
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - width/2 -((y/2 )+ yStart + (headPos.y-1) * width),width,y,0,Color.YELLOW)
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.YELLOW)
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (y+yStart + headPos.y * width),width,width,0,Color.ORANGE)
+      } else {
+        var headPos: Position = oldGrid.getHeadPos
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.YELLOW)
+        g.drawFilledRectangle(xStart + headPos.x * width + x/2 +width/2, g.getScreenHeight - (yStart + headPos.y * width), x, width, 0, Color.YELLOW)
+        g.drawFilledRectangle(xStart + headPos.x * width  + x, g.getScreenHeight - (yStart + headPos.y * width), width, width, 0, Color.ORANGE)
+      }
+
+    }else{
+      println(s"1$x,$y")
+      if (-x >= nbMove * width || -y >= nbMove * width) {
+        displayWin(g)
+        return true
+
+      }
+      if(action.isInstanceOf[North]) {
+        var headPos: Position = oldGrid.getHeadPos
+        g.drawFilledRectangle(xStart + headPos.x * width, g.getScreenHeight - y / 2 +  width / 2 - ( + yStart + headPos.y * width), width, -y, 0, Color.YELLOW)
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.YELLOW)
+        g.drawFilledRectangle(xStart + headPos.x * width, g.getScreenHeight - y - (+yStart + headPos.y * width), width, width, 0, Color.ORANGE)
+      } else {
+        var headPos: Position = oldGrid.getHeadPos
+        g.drawFilledRectangle(xStart + headPos.x * width + x / 2 - width / 2, g.getScreenHeight - (yStart + headPos.y * width), -x, width, 0, Color.YELLOW)
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.YELLOW)
+        g.drawFilledRectangle(xStart + headPos.x * width + x , g.getScreenHeight - (yStart + headPos.y * width), width, width, 0, Color.ORANGE)
+      }
+    }
+
+    false
+  }
+  def displayWin(g: GdxGraphics, in: Grid = this): Unit = {
+
+
+    val width: Int = g.getScreenHeight / (in.grid.length + 2)
+    val xStart: Int = g.getScreenWidth / 2 - width * in.grid.length /2  + width/2
+    val yStart: Int = width + width / 2
+    val headPos:Position = in.getHeadPos
+
+    for (y <- in.grid.indices; x <- in.grid(y).indices) {
+      if(y == headPos.y && x == headPos.x){
+        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.ORANGE)
+      }
+      else if (in.grid(y)(x).isObstacl) {
         g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.valueOf("48d055"))
-      } else if (in(y)(x).getValueInt > 0) {
+      } else if (in.grid(y)(x).getValueInt > 0) {
         g.drawFilledRectangle(xStart + x * width, g.getScreenHeight -  (yStart + y * width), width, width, 0, Color.YELLOW)
       } else {
         g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.GRAY)
@@ -445,14 +488,14 @@ class Grid(x: Int, y: Int) extends Serializable {
   }
 }
 
+class GridValid(var isPossible: Boolean, var playGrid: ArrayBuffer[ArrayBuffer[Cellule]], var solution: ArrayBuffer[ArrayBuffer[Cellule]]) extends Serializable {
 
-object Grids extends ArrayBuffer[Grid]  {
 
-  // Fonction pour sauvegarder une Grid
-  def save(fileName: String = "data\\saveGrid.txt"): Unit = {
+  // Fonction pour sauvegarder un GridValid
+  def save(db: GridValid, fileName: String = "data\\saveGrid.txt"): Unit = {
     try {
       var sv = new ObjectOutputStream(new FileOutputStream(new File(fileName), false))
-      sv.writeObject(this)
+      sv.writeObject(db)
       sv.close()
     }
     catch {
@@ -463,18 +506,15 @@ object Grids extends ArrayBuffer[Grid]  {
     }
   }
 
-  // Fonction pour charger un Grid
+  // Fonction pour charger un GridValid
+  def load(fileName: String = "data\\saveGrid.txt"): GridValid = {
 
-  def load(fileName: String = "data\\saveGrid.txt"):Unit = {
-
-    this.clear()
-
-    var db: ArrayBuffer[Grid] = new ArrayBuffer[Grid]()
+    var db: GridValid = new GridValid(false, null, null)
 
     try {
 
       val load = new ObjectInputStream(new FileInputStream(fileName))
-      db = load.readObject().asInstanceOf[ArrayBuffer[Grid]]
+      db = load.readObject().asInstanceOf[GridValid]
       load.close()
 
 
@@ -493,13 +533,11 @@ object Grids extends ArrayBuffer[Grid]  {
         System.exit(-1)
     }
 
-    for(pos : Int <- db.indices){
-
-      this.addOne(db(pos))
-
-    }
-
-
-
+    return db
   }
+
+}
+
+object Grids extends ArrayBuffer[Grid] {
+
 }

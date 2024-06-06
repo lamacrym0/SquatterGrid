@@ -25,6 +25,11 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var line: Int = 0
   var column: Int = 0
   var obsacl: Int = 0
+  var TheGrid: GridValid = new GridValid(false, null, null)
+  var action: Direction = null
+  var haveMove: Boolean = false
+  var oldGrid: Grid = null
+  var nbMove: Int = 0
   var menu: Boolean = true
 
   var solutionVisible: Boolean = false
@@ -75,7 +80,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   }
 
   override def onKeyDown(keycode: Int): Unit = {
-
+    print("ok")
     keycode match {
       case Input.Keys.DOWN =>
         actionKeyInput(South())
@@ -89,8 +94,6 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       case Input.Keys.SPACE =>
 
         if (!grid.headCanMove()) {
-          println(!grid.gridIsFinish)
-
           if (grid.gridIsFinish) {
             if (nbLvl % 6 == 0) {
               line += 1
@@ -99,10 +102,11 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
             } else if (nbLvl % 4 == 0) {
               column += 1
             }
-            if (nbLvl % 2 == 0)
+            if (nbLvl % 2 == 0) {
               obsacl += 1
+            }
+            nbLvl+=1
 
-            println(nbLvl)
             stratCmdGame(line, column, obsacl)
           } else {
             restartCmdGame()
@@ -125,11 +129,28 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   }
 
   def actionKeyInput(action: Direction): Unit = {
-    if (grid.move(action) != 0) {
+
+    if (haveMove) {
+      return
+    }
+
+    oldGrid = new Grid(grid.grid(0).length, grid.grid.length)
+    for (y <- grid.grid.indices; x <- grid.grid(y).indices) {
+      oldGrid.grid(y)(x) = new Cellule(grid.grid(y)(x).isObstacl, grid.grid(y)(x).haveSquatter, grid.grid(y)(x).getValueInt)
+    }
+
+
+    nbMove = grid.move(action)
+
+    if (nbMove != 0) {
+      haveMove = true
+      this.action = action
       grid.display()
       controlStatGame()
     }
+
   }
+
 
   def controlStatGame(): Unit = {
     if (!grid.headCanMove()) {
@@ -137,7 +158,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
         println("You Win! \n press space to go to the next level.")
         nbLvl += 1
       }
-      else {
+      else{
         println("You lose :( \n press space to restart.")
       }
     }
@@ -175,7 +196,6 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
           super.clicked(event, x, y)
           if (newGameButton.isChecked) {
             Logger.log(s"Button is checked $numButton")
-            Grids.load()
             grid = Grids(numButton - 1)
             menu = false
           }
@@ -209,27 +229,34 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   }
 
 
+  var x:Int = 0
+  var y:Int = 0
+
   override def onGraphicRender(g: GdxGraphics): Unit = {
 
     g.clear()
-    // This is required for having the GUI work properly
-    stage.act()
-    stage.draw()
+
     g.setBackgroundColor(Color.valueOf("48d055"))
+
+    if (haveMove) {
+      val width: Int = g.getScreenHeight / (grid.grid.length + 2)
+      x += action.actionX * width / 5
+      y += action.actionY * width / 5
+
+      haveMove = !grid.displayMove(g, oldGrid, action, x, y, nbMove, width)
+
+    }
+    else {
+      grid.displayWin(g)
+    }
+    if (!haveMove) {
+
+      x = 0
+      y = 0
+    }
     g.drawFPS()
     g.drawSchoolLogo()
 
-
-    if (menu) {
-      menuGame(g)
-    }
-    else {
-      g.clear()
-      g.drawFPS()
-
-      g.drawSchoolLogo()
-      grid.displayWin(g)
-    }
-
   }
+
 }
