@@ -1,8 +1,10 @@
 package classes
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.utils.Json
 import jdk.jfr.Percentage
 
+import java.io
 import java.io.{File, FileInputStream, FileNotFoundException, FileOutputStream, IOException, ObjectInputStream, ObjectOutputStream}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
@@ -10,6 +12,15 @@ import scala.util.Random
 object test extends App {
 
 
+var test : Grid = new Grid(10,3)
+
+test.generateGrid()
+
+Grids.addOne(test)
+
+Grids.save()
+
+Grids.load()
 
 
 
@@ -292,7 +303,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer()): Boolean = {
 
-    var result: GridValid = new GridValid(false, null, null)
+
 
     // Initialisiation sur la grille
     grid(posDepart.y)(posDepart.x).setValueInt(1)
@@ -430,14 +441,14 @@ class Grid(x: Int, y: Int) extends Serializable {
   }
 }
 
-class GridValid(var isPossible: Boolean, var playGrid: ArrayBuffer[ArrayBuffer[Cellule]], var solution: ArrayBuffer[ArrayBuffer[Cellule]]) extends Serializable {
 
+object Grids extends ArrayBuffer[Grid]  {
 
-  // Fonction pour sauvegarder un GridValid
-  def save(db: GridValid, fileName: String = "data\\saveGrid.txt"): Unit = {
+  // Fonction pour sauvegarder une Grid
+  def save(fileName: String = "data\\saveGrid.txt"): Unit = {
     try {
       var sv = new ObjectOutputStream(new FileOutputStream(new File(fileName), false))
-      sv.writeObject(db)
+      sv.writeObject(this)
       sv.close()
     }
     catch {
@@ -448,15 +459,18 @@ class GridValid(var isPossible: Boolean, var playGrid: ArrayBuffer[ArrayBuffer[C
     }
   }
 
-  // Fonction pour charger un GridValid
-  def load(fileName: String = "data\\saveGrid.txt"): GridValid = {
+  // Fonction pour charger un Grid
 
-    var db: GridValid = new GridValid(false, null, null)
+  def load(fileName: String = "data\\saveGrid.txt"):Unit = {
+
+    this.clear()
+
+    var db: ArrayBuffer[Grid] = new ArrayBuffer[Grid]()
 
     try {
 
       val load = new ObjectInputStream(new FileInputStream(fileName))
-      db = load.readObject().asInstanceOf[GridValid]
+      db = load.readObject().asInstanceOf[ArrayBuffer[Grid]]
       load.close()
 
 
@@ -475,38 +489,13 @@ class GridValid(var isPossible: Boolean, var playGrid: ArrayBuffer[ArrayBuffer[C
         System.exit(-1)
     }
 
-    return db
-  }
+    for(pos : Int <- db.indices){
 
-  // Fonction pour afficher
-  def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = solution): Unit = {
-    println("---------------------------SOLUTION-----------------------------")
+      this.addOne(db(pos))
 
-    print("\r")
-    var res: String = ""
-    for (y <- gridIn.indices) {
-      for (x <- gridIn(y).indices) {
-        if (!gridIn(y)(x).isObstacl) {
-          if (gridIn(y)(x).haveSquatter) {
-            res += gridIn(y)(x).getValueInt + " "
-          } else {
-            res += "0 "
-          }
-
-        }
-        else {
-          res += "X "
-        }
-      }
-      res += "\n"
     }
-    print(res)
-    println("-------------------------------------------------------------------")
+
+
+
   }
-
-
-}
-
-object Grids extends ArrayBuffer[Grid] {
-
 }
