@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.{InputEvent, Stage}
 import com.badlogic.gdx.scenes.scene2d.ui.{Skin, TextButton, TextField}
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
@@ -24,6 +25,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var line: Int = 0
   var column: Int = 0
   var obsacl: Int = 0
+  var menu: Boolean = true
 
   var solutionVisible: Boolean = false
   //var newGameButton
@@ -115,6 +117,9 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
         }
         else solutionVisible = false
 
+      case Input.Keys.R => menu = true
+
+
       case _ =>
     }
   }
@@ -137,73 +142,68 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       }
     }
   }
-  var stage : Stage = null
+
+  var stage: Stage = null
+
   def menuGame(g: GdxGraphics): Unit = {
-
-
 
     Gdx.input.setInputProcessor(stage) // Make the stage consume events
 
     // Load the default skin (which can be configured in the JSON file)
     var skin: Skin = new Skin(Gdx.files.internal("data/ui/uiskin.json"))
 
-    def buttoncreate(txt : String,col : Int = 220, lign : Int = 420, sizeW : Int = 200, sizeH : Int = 200, numButton : Int, offset : Int = 0) : Int = {
-
-      var result : Int = 0
+    def buttoncreate(txt: String, col: Int = 220, lign: Int = 420, sizeW: Int = 200, sizeH: Int = 200, numButton: Int, offset: Int = 0): Boolean = {
 
       val buttonWidth: Int = sizeW
       val buttonHeight: Int = sizeH
 
-      val newGameButton = new TextButton(s"$txt $numButton", skin)// Use the initialized skin
+      val newGameButton = new TextButton(s"$txt $numButton", skin) // Use the initialized skin
 
       newGameButton.setWidth(buttonWidth)
       newGameButton.setHeight(buttonHeight)
 
-      newGameButton.setPosition(lign*(numButton-offset),col)
+      newGameButton.setPosition(lign * (numButton - offset), col)
 
       stage.addActor(newGameButton)
 
 
-       // Register listener
+      // Register listener
 
 
       newGameButton.addListener(new ClickListener() {
         override def clicked(event: InputEvent, x: Float, y: Float): Unit = {
           super.clicked(event, x, y)
           if (newGameButton.isChecked) {
-            Logger.log("Button is checked")
-            result = numButton
+            Logger.log(s"Button is checked $numButton")
+            Grids.load()
+            grid = Grids(numButton - 1)
+            menu = false
           }
           else {
             Logger.log("Button is not checked")
-            result = 0
+
           }
         }
       })
 
-      return result
     }
 
-    val lign1 : Int = 240
 
-    var button1Select : Int = buttoncreate("Niveau",col = lign1,numButton = 1)
+    val lign1: Int = 240
 
-    var button2Select : Int = buttoncreate("Niveau",col = lign1,numButton = 2)
+    var button1Select: Boolean = buttoncreate("Niveau", col = lign1, numButton = 1)
 
-    var button3Select : Int = buttoncreate("Niveau",col = lign1,numButton = 3)
+    var button2Select: Boolean = buttoncreate("Niveau", col = lign1, numButton = 2)
+
+    var button3Select: Boolean = buttoncreate("Niveau", col = lign1, numButton = 3)
 
     val lign2: Int = 620
 
-    var button4Select: Int = buttoncreate("Niveau", col = lign2, numButton = 4,offset = 3)
+    var button4Select: Boolean = buttoncreate("Niveau", col = lign2, numButton = 4, offset = 3)
 
-    var button5Select: Int = buttoncreate("Niveau", col = lign2, numButton = 5,offset = 3)
+    var button5Select: Boolean = buttoncreate("Niveau", col = lign2, numButton = 5, offset = 3)
 
-    var button6Select: Int = buttoncreate("Niveau", col = lign2, numButton = 6,offset = 3)
-
-
-
-
-
+    var button6Select: Boolean = buttoncreate("Niveau", col = lign2, numButton = 6, offset = 3)
 
 
   }
@@ -218,10 +218,18 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     g.setBackgroundColor(Color.valueOf("48d055"))
     g.drawFPS()
     g.drawSchoolLogo()
-   // grid.displayWin(g)
-    menuGame(g)
+
+
+    if (menu) {
+      menuGame(g)
+    }
+    else {
+      g.clear()
+      g.drawFPS()
+
+      g.drawSchoolLogo()
+      grid.displayWin(g)
+    }
 
   }
-
-
 }

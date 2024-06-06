@@ -12,15 +12,19 @@ import scala.util.Random
 object test extends App {
 
 
-var test : Grid = new Grid(10,3)
+var test : Grid = new Grid(10,8)
 
-test.generateGrid()
+for(i <- 0 to 5){
 
-Grids.addOne(test)
+  test.generateGrid()
 
-Grids.save()
+  Grids.addOne(test)
 
-Grids.load()
+
+}
+
+  Grids.save()
+
 
 
 
