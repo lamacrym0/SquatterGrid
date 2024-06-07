@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.{InputEvent, Stage}
 import com.badlogic.gdx.scenes.scene2d.ui.{Skin, TextButton, TextField}
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 
+import java.util.concurrent.atomic.AtomicReferenceArray
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -33,13 +34,15 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var oldGrid: Grid = null
   var nbMove: Int = 0
   var menu: Boolean = true
-  var isShaking :Boolean = false
-  var nbShake:Int = 0
+  var isShaking: Boolean = false
+  var nbShake: Int = 0
 
   var catSs: Spritesheet = null
 
   var solutionVisible: Boolean = false
   //var newGameButton
+
+  var listeTouchesSauv: ArrayBuffer[Direction] = new ArrayBuffer[Direction]()
 
   def restartCmdGame(): Unit = {
     println(s"taille: $line x $column, obstacles: $obsacl")
@@ -90,12 +93,16 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     print("ok")
     keycode match {
       case Input.Keys.DOWN =>
+        listeTouchesSauv.addOne(South())
         actionKeyInput(South())
       case Input.Keys.UP =>
+        listeTouchesSauv.addOne(North())
         actionKeyInput(North())
       case Input.Keys.LEFT =>
+        listeTouchesSauv.addOne(West())
         actionKeyInput(West())
       case Input.Keys.RIGHT =>
+        listeTouchesSauv.addOne(East())
         actionKeyInput(East())
 
       case Input.Keys.SPACE =>
@@ -112,7 +119,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
             if (nbLvl % 2 == 0) {
               obsacl += 1
             }
-            nbLvl+=1
+            nbLvl += 1
 
             stratCmdGame(line, column, obsacl)
           } else {
@@ -122,15 +129,77 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
         }
 
       // Touche pour voir la solution dans la console de la grille
-      case Input.Keys.S => grid.display(grid.gridSolution)
+      case Input.Keys.S => grid.display(grid.gridSolution, true)
         if (!solutionVisible) {
           solutionVisible = true
         }
         else solutionVisible = false
 
+      case Input.Keys.A => automaticSolver()
+        println(grid.getHeadPos)
+        println(grid.adjacentCell().mkString("|"))
+        println("Bouton A")
 
       case _ =>
     }
+  }
+
+  def automaticSolver(): Unit = {
+
+    var positionHead: Position = grid.getHeadPos
+
+    val valueHeadInt: Int = grid.gridSolution(positionHead.y)(positionHead.x).getValueInt
+
+    val cellavailable: Array[Position] = grid.adjacentCell()
+
+
+    for (pos: Int <- cellavailable.indices) {
+      val cellTest: Position = cellavailable(pos)
+      if (grid.gridSolution(cellTest.y)(cellTest.x).getValueInt == (valueHeadInt + 1)) {
+        val xMove: Int = cellTest.x - positionHead.x
+        val yMove: Int = cellTest.y - positionHead.y
+
+        // 1er Mouvement
+        if (yMove != 0 || xMove != 0) {
+          if (yMove == 0) {
+            if (xMove < 0) {
+
+              actionKeyInput((West()))
+            }
+            else {
+              actionKeyInput(East())
+
+
+            }
+          }
+          else {
+            if (yMove < 0) {
+
+              actionKeyInput((North()))
+
+            }
+            else {
+              actionKeyInput((South()))
+
+            }
+          }
+        }
+      }
+
+
+    }
+
+  }
+
+  def getValuePos(nb: Int): Position = {
+    var res: Position = new Position(0, 0)
+
+    for (y <- grid.gridSolution.indices) {
+      for (x <- grid.gridSolution(y).indices if (grid.gridSolution(y)(x).getValueInt == nb)) {
+        res = new Position(x, y)
+      }
+    }
+    res
   }
 
   def actionKeyInput(action: Direction): Unit = {
@@ -156,6 +225,28 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
 
   }
 
+  def actionKeyInputInv(action: Direction): Unit = {
+
+    if (haveMove || isShaking) {
+      return
+    }
+
+    oldGrid = new Grid(grid.grid(0).length, grid.grid.length)
+    for (y <- grid.grid.indices; x <- grid.grid(y).indices) {
+      oldGrid.grid(y)(x) = new Cellule(grid.grid(y)(x).isObstacl, grid.grid(y)(x).haveSquatter, grid.grid(y)(x).getValueInt)
+    }
+
+
+    nbMove = grid.move(action, true)
+
+    if (nbMove != 0) {
+      haveMove = true
+      this.action = action
+      grid.display()
+      controlStatGame()
+    }
+
+  }
 
   def controlStatGame(): Unit = {
     if (!grid.headCanMove()) {
@@ -163,16 +254,16 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
         println("You Win! \n press space to go to the next level.")
         nbLvl += 1
       }
-      else{
+      else {
         println("You lose :( \n press space to restart.")
       }
     }
   }
 
 
-  def shake(g:GdxGraphics, nbShake: Int,in:Grid = grid): Boolean = {
+  def shake(g: GdxGraphics, nbShake: Int, in: Grid = grid): Boolean = {
     if (this.nbShake >= nbShake) {
-      in.displayWin(g,catSs = catSs)
+      in.displayWin(g, catSs = catSs)
       return true
     }
 
@@ -181,10 +272,10 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     val yStart: Int = width + width / 2
     val headPos: Position = in.getHeadPos
 
-    val posShake:Int = this.nbShake match {
-      case (1| 2 | 3)=> 10
-      case (4| 5 | 6) => 0
-      case (7| 8 | 9) => -10
+    val posShake: Int = this.nbShake match {
+      case (1 | 2 | 3) => 10
+      case (4 | 5 | 6) => 0
+      case (7 | 8 | 9) => -10
       case _ => 0
     }
 
@@ -204,15 +295,16 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     print("shake")
     false
   }
-  var x:Int = 0
-  var y:Int = 0
+
+  var x: Int = 0
+  var y: Int = 0
 
   override def onGraphicRender(g: GdxGraphics): Unit = {
 
     g.clear()
 
-    if(catSs == null){
-     catSs = new Spritesheet("data/images/CHAT.png",8,8)
+    if (catSs == null) {
+      catSs = new Spritesheet("data/images/CHAT.png", 8, 8)
     }
 
     g.setBackgroundColor(Color.valueOf("48d055"))
@@ -222,16 +314,16 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       x += action.actionX * width / 5
       y += action.actionY * width / 5
 
-      haveMove = !grid.displayMove(g, oldGrid, action, x, y, nbMove, width,catSs)
-      if(!haveMove){
+      haveMove = !grid.displayMove(g, oldGrid, action, x, y, nbMove, width, catSs)
+      if (!haveMove) {
         isShaking = true
         this.nbShake = 0
       }
-    } else if(isShaking){
-      isShaking = !shake(g,10)
+    } else if (isShaking) {
+      isShaking = !shake(g, 10)
     }
     else {
-      grid.displayWin(g,catSs = catSs)
+      grid.displayWin(g, catSs = catSs)
     }
     if (!haveMove) {
 

@@ -2,6 +2,7 @@ package classes
 import ch.hevs.gdx2d.components.bitmaps.Spritesheet
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.utils.Json
 import jdk.jfr.Percentage
 
@@ -17,6 +18,8 @@ class Grid(x: Int, y: Int) extends Serializable {
   var grid: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
 
   var gridSolution: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
+
+  var gridSolutionString : String = ""
 
 
   for (idy <- 0 until y) {
@@ -82,6 +85,9 @@ class Grid(x: Int, y: Int) extends Serializable {
   var catAnim:Int = 0
   def displayWin(g: GdxGraphics, in: Grid = this,catSs:Spritesheet): Unit = {
 
+    g.drawString(60,400,gridSolutionString, new BitmapFont(),45)
+
+
     if(catAnim > 200){
       catAnim = 0
     }
@@ -116,24 +122,40 @@ class Grid(x: Int, y: Int) extends Serializable {
     catAnim += 1
   }
 
-  def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = grid): Unit = {
+  def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = grid, visible : Boolean = false): Unit = {
+    var ligne : String = ""
+    for(i <- gridIn){
+      ligne += "-----"
+    }
     print("\r")
     var res: String = ""
     for (y <- gridIn.indices) {
       for (x <- gridIn(y).indices) {
         if (!gridIn(y)(x).isObstacl) {
           if (gridIn(y)(x).haveSquatter) {
-            res += gridIn(y)(x).getValueInt + " "
+            val value : Int = gridIn(y)(x).getValueInt
+            if (value <= 9){
+              res += "|" + value + "  |"
+            }
+            else {
+              res += "|" + value + " |"
+
+            }
           } else {
-            res += "0 "
+            res += "| 0 |"
           }
 
         }
         else {
-          res += "X "
+          res += "| X |"
         }
       }
       res += "\n"
+      res += ligne
+      res += "\n"
+    }
+    if(visible){
+      gridSolutionString = "---------Solution---------\n\n"+res
     }
     print(res)
   }
@@ -164,7 +186,30 @@ class Grid(x: Int, y: Int) extends Serializable {
     true
   }
 
-  def move(action: Direction): Int = {
+  def move(action: Direction, inv : Boolean = false): Int = {
+    if (inv) {
+      moveInv(action)
+    }
+    else {
+      var headX: Int = getHeadPos.x
+      var headY: Int = getHeadPos.y
+
+      if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0) {
+        return 0
+      }
+
+      else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter) {
+        return 0
+      }
+      else {
+        grid(headY + action.actionY)(headX + action.actionX).setValueInt(grid(headY)(headX).getValueInt + 1)
+        return 1 + move(action)
+      }
+    }
+  }
+
+
+  def moveInv(action: Direction): Int = {
     var headX: Int = getHeadPos.x
     var headY: Int = getHeadPos.y
 
@@ -172,14 +217,16 @@ class Grid(x: Int, y: Int) extends Serializable {
       return 0
     }
 
-    else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter) {
+    else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || !grid(headY + action.actionY)(headX + action.actionX).haveSquatter) {
       return 0
     }
     else {
-      grid(headY + action.actionY)(headX + action.actionX).setValueInt(grid(headY)(headX).getValueInt + 1)
+      grid(headY + action.actionY)(headX + action.actionX).setValueInt(0)
       return 1 + move(action)
     }
   }
+
+
 
   def getHeadPos: Position = {
     var res: Position = new Position(0, 0)
@@ -193,6 +240,8 @@ class Grid(x: Int, y: Int) extends Serializable {
     }
     res
   }
+
+
 
 
   // Fonction pour calculer le pourcentage d'occupation de la surface par le "Squatter"
