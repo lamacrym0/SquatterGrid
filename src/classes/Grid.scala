@@ -82,7 +82,7 @@ class Grid(x: Int, y: Int) extends Serializable {
   var catAnim:Int = 0
   def displayWin(g: GdxGraphics, in: Grid = this,catSs:Spritesheet): Unit = {
 
-    if(catAnim > 150){
+    if(catAnim > 200){
       catAnim = 0
     }
     val width: Int = g.getScreenHeight / (in.grid.length + 2)

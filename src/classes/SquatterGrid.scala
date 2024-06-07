@@ -33,6 +33,8 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var oldGrid: Grid = null
   var nbMove: Int = 0
   var menu: Boolean = true
+  var isShaking :Boolean = false
+  var nbShake:Int = 0
 
   var catSs: Spritesheet = null
 
@@ -133,7 +135,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
 
   def actionKeyInput(action: Direction): Unit = {
 
-    if (haveMove) {
+    if (haveMove || isShaking) {
       return
     }
 
@@ -168,6 +170,40 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   }
 
 
+  def shake(g:GdxGraphics, nbShake: Int,in:Grid = grid): Boolean = {
+    if (this.nbShake >= nbShake) {
+      in.displayWin(g,catSs = catSs)
+      return true
+    }
+
+    val width: Int = g.getScreenHeight / (in.grid.length + 2)
+    val xStart: Int = g.getScreenWidth / 2 - width * in.grid.length / 2 + width / 2
+    val yStart: Int = width + width / 2
+    val headPos: Position = in.getHeadPos
+
+    val posShake:Int = this.nbShake match {
+      case (1| 2 | 3)=> 10
+      case (4| 5 | 6) => 0
+      case (7| 8 | 9) => -10
+      case _ => 0
+    }
+
+    for (y <- in.grid.indices; x <- in.grid(y).indices) {
+      if (y == headPos.y && x == headPos.x) {
+        g.draw(catSs.sprites(0)(0), (posShake + xStart + x * width - width / 2).toFloat, (g.getScreenHeight - (posShake + yStart + y * width) - width / 2).toFloat, width.toFloat, width.toFloat)
+      }
+      else if (in.grid(y)(x).isObstacl) {
+        g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("48d055"))
+      } else if (in.grid(y)(x).getValueInt > 0) {
+        g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("ffeb00"))
+      } else {
+        g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("e1755a"))
+      }
+    }
+    this.nbShake += 1
+    print("shake")
+    false
+  }
   var x:Int = 0
   var y:Int = 0
 
@@ -187,7 +223,12 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       y += action.actionY * width / 5
 
       haveMove = !grid.displayMove(g, oldGrid, action, x, y, nbMove, width,catSs)
-
+      if(!haveMove){
+        isShaking = true
+        this.nbShake = 0
+      }
+    } else if(isShaking){
+      isShaking = !shake(g,10)
     }
     else {
       grid.displayWin(g,catSs = catSs)
