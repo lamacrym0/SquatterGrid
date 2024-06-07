@@ -8,30 +8,31 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Stage
 
-
-
 import scala.collection.mutable.ArrayBuffer
 
 
 object application extends App {
 
-  //def launch() : Unit = {
+  def launch(lineS: Int = 3, colS: Int = 3, attempt: Int = 0): Unit = {
+    val maxAttempts = 3
     var game: SquatterGrid = new SquatterGrid()
-    var lineS : Int = 3
-    var colS : Int = 3
-    //try {
-      game.stratCmdGame(lineS,colS, 0)
-    //}
-   // catch{
-     // case e :  StackOverflowError => launch()
 
-    //}
- // }
+    try {
+      game.stratCmdGame(lineS, colS, 0)
+      println(s"Game started with dimensions: ${game.line} x ${game.column}")
+    } catch {
+      case e: StackOverflowError =>
+        if (attempt < maxAttempts) {
+          println(s"StackOverflowError encountered. Attempting again (Attempt ${attempt + 1}/$maxAttempts)...")
+          launch(lineS, colS, attempt + 1)
+        } else {
+          println("Max attempts reached. Unable to start the game.")
+        }
+    }
+  }
 
-  //launch()
-
-
-
+  // Start the game
+  launch()
 
 }
 
@@ -59,7 +60,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var listeTouchesSauv: ArrayBuffer[Direction] = new ArrayBuffer[Direction]()
 
   def restartCmdGame(): Unit = {
-   // println(s"taille: $line x $column, obstacles: $obsacl")
+    // println(s"taille: $line x $column, obstacles: $obsacl")
     grid.resetGrid()
     //grid.display()
   }
@@ -67,7 +68,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   def stratCmdGame(line: Int, column: Int, obstacl: Int): Unit = {
     this.line = line
     this.column = column
-   // println(s"taille: $line x $column, obstacles: $obsacl")
+    // println(s"taille: $line x $column, obstacles: $obsacl")
     grid = new Grid(line, column)
 
     var isGenerer: Boolean = false
@@ -104,7 +105,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   }
 
   override def onKeyDown(keycode: Int): Unit = {
-   // print("ok")
+    // print("ok")
     keycode match {
       case Input.Keys.DOWN =>
         listeTouchesSauv.addOne(South())
@@ -206,7 +207,6 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   }
 
 
-
   def actionKeyInput(action: Direction): Unit = {
 
     if (haveMove || isShaking) {
@@ -224,7 +224,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     if (nbMove != 0) {
       haveMove = true
       this.action = action
-     // grid.display()
+      // grid.display()
       controlStatGame()
     }
 
@@ -275,7 +275,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       }
     }
     this.nbShake += 1
-   // print("shake")
+    // print("shake")
     false
   }
 
