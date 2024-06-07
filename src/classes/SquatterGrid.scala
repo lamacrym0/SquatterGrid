@@ -1,5 +1,6 @@
 package classes
 
+import ch.hevs.gdx2d.components.bitmaps.Spritesheet
 import ch.hevs.gdx2d.desktop.PortableApplication
 import ch.hevs.gdx2d.lib.GdxGraphics
 import ch.hevs.gdx2d.lib.utils.Logger
@@ -20,6 +21,7 @@ object application extends App {
 }
 
 class SquatterGrid() extends PortableApplication(1920, 1200) {
+
   var nbLvl: Int = 1
   var grid: Grid = null
   var line: Int = 0
@@ -31,6 +33,8 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var oldGrid: Grid = null
   var nbMove: Int = 0
   var menu: Boolean = true
+
+  var catSs: Spritesheet = null
 
   var solutionVisible: Boolean = false
   //var newGameButton
@@ -236,6 +240,10 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
 
     g.clear()
 
+    if(catSs == null){
+     catSs = new Spritesheet("data/images/CHAT.png",8,8)
+    }
+
     g.setBackgroundColor(Color.valueOf("48d055"))
 
     if (haveMove) {
@@ -243,11 +251,11 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       x += action.actionX * width / 5
       y += action.actionY * width / 5
 
-      haveMove = !grid.displayMove(g, oldGrid, action, x, y, nbMove, width)
+      haveMove = !grid.displayMove(g, oldGrid, action, x, y, nbMove, width,catSs)
 
     }
     else {
-      grid.displayWin(g)
+      grid.displayWin(g,catSs = catSs)
     }
     if (!haveMove) {
 

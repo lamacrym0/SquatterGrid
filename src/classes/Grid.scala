@@ -1,4 +1,5 @@
 package classes
+import ch.hevs.gdx2d.components.bitmaps.Spritesheet
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.utils.Json
@@ -30,6 +31,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   var gridSolution: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
 
+
   for (idy <- 0 until y) {
     grid.addOne(new ArrayBuffer[Cellule]())
     for (idx <- 0 until x) {
@@ -44,56 +46,58 @@ class Grid(x: Int, y: Int) extends Serializable {
     }
   }
 
-  def displayMove(g:GdxGraphics,oldGrid:Grid,action:Direction,x:Int,y:Int,nbMove:Int,width:Int):Boolean = {
+  def displayMove(g:GdxGraphics,oldGrid:Grid,action:Direction,x:Int,y:Int,nbMove:Int,width:Int,catSs:Spritesheet):Boolean = {
 
     val xStart: Int = g.getScreenWidth / 2 - width * oldGrid.grid.length / 2 + width / 2
     val yStart: Int = width + width / 2
 
-    displayWin(g,oldGrid)
+    displayWin(g,oldGrid,catSs)
 
     if(action.isInstanceOf[South] || action.isInstanceOf[East]){
       if (x >= (nbMove) * width || y >= nbMove * width) {
-        displayWin(g)
+        displayWin(g,catSs = catSs)
         return true
       }
 
       if(action.isInstanceOf[South]){
         var headPos:Position = oldGrid.getHeadPos
-        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - width/2 -((y/2 )+ yStart + (headPos.y-1) * width),width,y,0,Color.YELLOW)
-        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.YELLOW)
-        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (y+yStart + headPos.y * width),width,width,0,Color.ORANGE)
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - width/2 -((y/2 )+ yStart + (headPos.y-1) * width),width,y,0,Color.valueOf("ffeb00"))
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.valueOf("ffeb00"))
+        g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width - width/2).toFloat,  (g.getScreenHeight - (y+yStart + headPos.y * width)- width/2).toFloat,width.toFloat,width.toFloat)
       } else {
         var headPos: Position = oldGrid.getHeadPos
-        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.YELLOW)
-        g.drawFilledRectangle(xStart + headPos.x * width + x/2 +width/2, g.getScreenHeight - (yStart + headPos.y * width), x, width, 0, Color.YELLOW)
-        g.drawFilledRectangle(xStart + headPos.x * width  + x, g.getScreenHeight - (yStart + headPos.y * width), width, width, 0, Color.ORANGE)
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.valueOf("ffeb00"))
+        g.drawFilledRectangle(xStart + headPos.x * width + x/2 +width/2, g.getScreenHeight - (yStart + headPos.y * width), x, width, 0, Color.valueOf("ffeb00"))
+        g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width  + x - width/2).toFloat, (g.getScreenHeight - (yStart + headPos.y * width)-width/2).toFloat,width.toFloat,width.toFloat)
       }
 
     }else{
-      println(s"1$x,$y")
       if (-x >= nbMove * width || -y >= nbMove * width) {
-        displayWin(g)
+        displayWin(g,catSs = catSs)
         return true
 
       }
       if(action.isInstanceOf[North]) {
         var headPos: Position = oldGrid.getHeadPos
-        g.drawFilledRectangle(xStart + headPos.x * width, g.getScreenHeight - y / 2 +  width / 2 - ( + yStart + headPos.y * width), width, -y, 0, Color.YELLOW)
-        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.YELLOW)
-        g.drawFilledRectangle(xStart + headPos.x * width, g.getScreenHeight - y - (+yStart + headPos.y * width), width, width, 0, Color.ORANGE)
+        g.drawFilledRectangle(xStart + headPos.x * width, g.getScreenHeight - y / 2 +  width / 2 - ( + yStart + headPos.y * width), width, -y, 0, Color.valueOf("ffeb00"))
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.valueOf("ffeb00"))
+        g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width - width/2).toFloat,  (g.getScreenHeight - (y+yStart + headPos.y * width)- width/2).toFloat,width.toFloat,width.toFloat)
       } else {
         var headPos: Position = oldGrid.getHeadPos
-        g.drawFilledRectangle(xStart + headPos.x * width + x / 2 - width / 2, g.getScreenHeight - (yStart + headPos.y * width), -x, width, 0, Color.YELLOW)
-        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.YELLOW)
-        g.drawFilledRectangle(xStart + headPos.x * width + x , g.getScreenHeight - (yStart + headPos.y * width), width, width, 0, Color.ORANGE)
+        g.drawFilledRectangle(xStart + headPos.x * width + x / 2 - width / 2, g.getScreenHeight - (yStart + headPos.y * width), -x, width, 0, Color.valueOf("ffeb00"))
+        g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.valueOf("ffeb00"))
+        g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width + x - width/2).toFloat , (g.getScreenHeight - (yStart + headPos.y * width)-width/2).toFloat,width.toFloat,width.toFloat)
       }
     }
 
     false
   }
-  def displayWin(g: GdxGraphics, in: Grid = this): Unit = {
+  var catAnim:Int = 0
+  def displayWin(g: GdxGraphics, in: Grid = this,catSs:Spritesheet): Unit = {
 
-
+    if(catAnim > 150){
+      catAnim = 0
+    }
     val width: Int = g.getScreenHeight / (in.grid.length + 2)
     val xStart: Int = g.getScreenWidth / 2 - width * in.grid.length /2  + width/2
     val yStart: Int = width + width / 2
@@ -101,16 +105,28 @@ class Grid(x: Int, y: Int) extends Serializable {
 
     for (y <- in.grid.indices; x <- in.grid(y).indices) {
       if(y == headPos.y && x == headPos.x){
-        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.ORANGE)
+        if(catAnim == 100 && catAnim < 102){
+          g.draw(catSs.sprites(0)(1),(xStart + x * width - width/2).toFloat, (g.getScreenHeight -  (yStart + y * width)- width/2).toFloat,width.toFloat,width.toFloat)
+
+        } else if(catAnim >= 102 && catAnim < 110){
+          g.draw(catSs.sprites(0)(2),(xStart + x * width - width/2).toFloat, (g.getScreenHeight -  (yStart + y * width)- width/2).toFloat,width.toFloat,width.toFloat)
+
+        } else if(catAnim >= 110 && catAnim < 120){
+          g.draw(catSs.sprites(0)(3),(xStart + x * width - width/2).toFloat, (g.getScreenHeight -  (yStart + y * width)- width/2).toFloat,width.toFloat,width.toFloat)
+
+        } else {
+          g.draw(catSs.sprites(0)(0),(xStart + x * width - width/2).toFloat, (g.getScreenHeight -  (yStart + y * width)- width/2).toFloat,width.toFloat,width.toFloat)
+        }
       }
       else if (in.grid(y)(x).isObstacl) {
         g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.valueOf("48d055"))
       } else if (in.grid(y)(x).getValueInt > 0) {
-        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight -  (yStart + y * width), width, width, 0, Color.YELLOW)
+        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight -  (yStart + y * width), width, width, 0, Color.valueOf("ffeb00"))
       } else {
-        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.GRAY)
+        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.valueOf("e1755a"))
       }
     }
+    catAnim += 1
   }
 
   def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = grid): Unit = {
