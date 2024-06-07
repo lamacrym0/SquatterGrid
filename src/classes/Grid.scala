@@ -160,7 +160,7 @@ class Grid(x: Int, y: Int) extends Serializable {
     print(res)
   }
 
-  
+
 
   def headCanMove(): Boolean = {
     var headX: Int = getHeadPos.x
@@ -397,36 +397,40 @@ class Grid(x: Int, y: Int) extends Serializable {
   }
 
 
+
+
+
+
   // Initialiser la postion de départ
   private val posDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
-  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer()): Boolean = {
+  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer(),findsol : Boolean = false): Boolean = {
 
 
-
-    // Initialisiation sur la grille
-    grid(posDepart.y)(posDepart.x).setValueInt(1)
-
-
-    // création d'obstacles imposés
-    var counterObstacles: Int = 0
-    if (nbObstacleInit > 0) {
-      while (counterObstacles < nbObstacleInit) {
-        val posXObs: Int = (math.random() * grid(0).length - 1).toInt
+if(!findsol) {
+  // Initialisiation sur la grille
+  grid(posDepart.y)(posDepart.x).setValueInt(1)
 
 
-        val posYObs: Int = (math.random() * grid.length - 1).toInt
+  // création d'obstacles imposés
+  var counterObstacles: Int = 0
+  if (nbObstacleInit > 0) {
+    while (counterObstacles < nbObstacleInit) {
+      val posXObs: Int = (math.random() * grid(0).length - 1).toInt
 
-        val value: Cellule = grid(posYObs)(posXObs)
-        if (!value.isObstacl && value.getValueInt < 1) {
 
-          grid(posYObs)(posXObs).isObstacl = true
+      val posYObs: Int = (math.random() * grid.length - 1).toInt
 
-          counterObstacles += 1
-        }
+      val value: Cellule = grid(posYObs)(posXObs)
+      if (!value.isObstacl && value.getValueInt < 1) {
+
+        grid(posYObs)(posXObs).isObstacl = true
+
+        counterObstacles += 1
       }
     }
-
+  }
+}
 
     // Initialistion direction de départ
     var initialAvailableCells: ArrayBuffer[Position] = adjacentCell().to(ArrayBuffer)
@@ -490,7 +494,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
 
     if (find()) {
-      println(s"Rempli à: ${(occupation() * 100).toInt} %")
+     // println(s"Rempli à: ${(occupation() * 100).toInt} %")
 
       //On remplit les trous avec la fonction ci-dessous
       fillGridWith()

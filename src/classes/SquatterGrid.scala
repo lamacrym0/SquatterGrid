@@ -10,14 +10,31 @@ import com.badlogic.gdx.scenes.scene2d.{InputEvent, Stage}
 import com.badlogic.gdx.scenes.scene2d.ui.{Skin, TextButton, TextField}
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 
+import java.io.IOException
 import java.util.concurrent.atomic.AtomicReferenceArray
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
 object application extends App {
-  var game: SquatterGrid = new SquatterGrid()
-  game.stratCmdGame(3, 3, 0)
+
+  //def launch() : Unit = {
+    var game: SquatterGrid = new SquatterGrid()
+    var lineS : Int = 3
+    var colS : Int = 3
+    //try {
+      game.stratCmdGame(lineS,colS, 0)
+    //}
+   // catch{
+     // case e :  StackOverflowError => launch()
+
+    //}
+ // }
+
+  //launch()
+
+
+
 
 }
 
@@ -33,7 +50,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var haveMove: Boolean = false
   var oldGrid: Grid = null
   var nbMove: Int = 0
-  var menu: Boolean = true
+
   var isShaking: Boolean = false
   var nbShake: Int = 0
 
@@ -45,15 +62,15 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var listeTouchesSauv: ArrayBuffer[Direction] = new ArrayBuffer[Direction]()
 
   def restartCmdGame(): Unit = {
-    println(s"taille: $line x $column, obstacles: $obsacl")
+   // println(s"taille: $line x $column, obstacles: $obsacl")
     grid.resetGrid()
-    grid.display()
+    //grid.display()
   }
 
   def stratCmdGame(line: Int, column: Int, obstacl: Int): Unit = {
     this.line = line
     this.column = column
-    println(s"taille: $line x $column, obstacles: $obsacl")
+   // println(s"taille: $line x $column, obstacles: $obsacl")
     grid = new Grid(line, column)
 
     var isGenerer: Boolean = false
@@ -78,7 +95,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       }
     }
 
-    grid.display()
+    //grid.display()
   }
 
   var stage: Stage = null
@@ -90,7 +107,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   }
 
   override def onKeyDown(keycode: Int): Unit = {
-    print("ok")
+   // print("ok")
     keycode match {
       case Input.Keys.DOWN =>
         listeTouchesSauv.addOne(South())
@@ -136,10 +153,6 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
         else solutionVisible = false
 
       case Input.Keys.A => automaticSolver()
-        println(grid.getHeadPos)
-        println(grid.adjacentCell().mkString("|"))
-        println("Bouton A")
-
       case _ =>
     }
   }
@@ -152,43 +165,47 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
 
     val cellavailable: Array[Position] = grid.adjacentCell()
 
+    if (cellavailable.isEmpty && grid.gridIsFinish) {
+      return
+    }
 
-    for (pos: Int <- cellavailable.indices) {
-      val cellTest: Position = cellavailable(pos)
-      if (grid.gridSolution(cellTest.y)(cellTest.x).getValueInt == (valueHeadInt + 1)) {
-        val xMove: Int = cellTest.x - positionHead.x
-        val yMove: Int = cellTest.y - positionHead.y
+    else {
 
-        // 1er Mouvement
-        if (yMove != 0 || xMove != 0) {
-          if (yMove == 0) {
-            if (xMove < 0) {
+      for (pos: Int <- cellavailable.indices) {
+        val cellTest: Position = cellavailable(pos)
+        if (grid.gridSolution(cellTest.y)(cellTest.x).getValueInt == (valueHeadInt + 1)) {
+          val xMove: Int = cellTest.x - positionHead.x
+          val yMove: Int = cellTest.y - positionHead.y
 
-              actionKeyInput((West()))
+          // 1er Mouvement
+          if (yMove != 0 || xMove != 0) {
+            if (yMove == 0) {
+              if (xMove < 0) {
+
+                actionKeyInput((West()))
+              }
+              else {
+                actionKeyInput(East())
+
+
+              }
             }
             else {
-              actionKeyInput(East())
+              if (yMove < 0) {
 
+                actionKeyInput((North()))
 
-            }
-          }
-          else {
-            if (yMove < 0) {
+              }
+              else {
+                actionKeyInput((South()))
 
-              actionKeyInput((North()))
-
-            }
-            else {
-              actionKeyInput((South()))
-
+              }
             }
           }
         }
+
       }
-
-
     }
-
   }
 
   def getValuePos(nb: Int): Position = {
@@ -219,34 +236,12 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     if (nbMove != 0) {
       haveMove = true
       this.action = action
-      grid.display()
+     // grid.display()
       controlStatGame()
     }
 
   }
 
-  def actionKeyInputInv(action: Direction): Unit = {
-
-    if (haveMove || isShaking) {
-      return
-    }
-
-    oldGrid = new Grid(grid.grid(0).length, grid.grid.length)
-    for (y <- grid.grid.indices; x <- grid.grid(y).indices) {
-      oldGrid.grid(y)(x) = new Cellule(grid.grid(y)(x).isObstacl, grid.grid(y)(x).haveSquatter, grid.grid(y)(x).getValueInt)
-    }
-
-
-    nbMove = grid.move(action, true)
-
-    if (nbMove != 0) {
-      haveMove = true
-      this.action = action
-      grid.display()
-      controlStatGame()
-    }
-
-  }
 
   def controlStatGame(): Unit = {
     if (!grid.headCanMove()) {
@@ -292,7 +287,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       }
     }
     this.nbShake += 1
-    print("shake")
+   // print("shake")
     false
   }
 
