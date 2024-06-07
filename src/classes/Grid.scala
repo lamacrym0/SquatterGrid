@@ -10,19 +10,6 @@ import java.io.{File, FileInputStream, FileNotFoundException, FileOutputStream, 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-object test extends App {
-
-
-var test : Grid = new Grid(10,8)
-
-  for(i <- 0 to 5){
-
-    test.generateGrid()
-
-    Grids.addOne(test)
-  }
-}
-
 
 class Grid(x: Int, y: Int) extends Serializable {
 
@@ -502,58 +489,4 @@ class Grid(x: Int, y: Int) extends Serializable {
       }
     }
   }
-}
-
-class GridValid(var isPossible: Boolean, var playGrid: ArrayBuffer[ArrayBuffer[Cellule]], var solution: ArrayBuffer[ArrayBuffer[Cellule]]) extends Serializable {
-
-
-  // Fonction pour sauvegarder un GridValid
-  def save(db: GridValid, fileName: String = "data\\saveGrid.txt"): Unit = {
-    try {
-      var sv = new ObjectOutputStream(new FileOutputStream(new File(fileName), false))
-      sv.writeObject(db)
-      sv.close()
-    }
-    catch {
-      case e: FileNotFoundException =>
-        System.err.println("Bad output file " + fileName + " !\n")
-        e.printStackTrace()
-        System.exit(-1)
-    }
-  }
-
-  // Fonction pour charger un GridValid
-  def load(fileName: String = "data\\saveGrid.txt"): GridValid = {
-
-    var db: GridValid = new GridValid(false, null, null)
-
-    try {
-
-      val load = new ObjectInputStream(new FileInputStream(fileName))
-      db = load.readObject().asInstanceOf[GridValid]
-      load.close()
-
-
-    }
-    catch {
-
-      case e: FileNotFoundException =>
-        System.err.println("Bad input file " + fileName + " !\n")
-        e.printStackTrace()
-        System.exit(-1)
-
-
-      case e: IOException =>
-        System.err.println("Error reading file " + " !\n")
-        e.printStackTrace()
-        System.exit(-1)
-    }
-
-    return db
-  }
-
-}
-
-object Grids extends ArrayBuffer[Grid] {
-
 }

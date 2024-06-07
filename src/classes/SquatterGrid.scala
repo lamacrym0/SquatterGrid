@@ -27,7 +27,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
   var line: Int = 0
   var column: Int = 0
   var obsacl: Int = 0
-  var TheGrid: GridValid = new GridValid(false, null, null)
+
   var action: Direction = null
   var haveMove: Boolean = false
   var oldGrid: Grid = null
@@ -69,13 +69,14 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
         grid.generateGrid(percentageCoverGrid = area, nbObstacleInit = nbObs)
 
         isGenerer = true
-        Grids.addOne(grid)
+
       }
     }
 
     grid.display()
   }
 
+  var stage: Stage = null
 
   override def onInit(): Unit = {
     setTitle("Squatter Grid")
@@ -125,8 +126,6 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
         }
         else solutionVisible = false
 
-      case Input.Keys.R => menu = true
-
 
       case _ =>
     }
@@ -166,70 +165,6 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
         println("You lose :( \n press space to restart.")
       }
     }
-  }
-
-  var stage: Stage = null
-
-  def menuGame(g: GdxGraphics): Unit = {
-
-    Gdx.input.setInputProcessor(stage) // Make the stage consume events
-
-    // Load the default skin (which can be configured in the JSON file)
-    var skin: Skin = new Skin(Gdx.files.internal("data/ui/uiskin.json"))
-
-    def buttoncreate(txt: String, col: Int = 220, lign: Int = 420, sizeW: Int = 200, sizeH: Int = 200, numButton: Int, offset: Int = 0): Boolean = {
-
-      val buttonWidth: Int = sizeW
-      val buttonHeight: Int = sizeH
-
-      val newGameButton = new TextButton(s"$txt $numButton", skin) // Use the initialized skin
-
-      newGameButton.setWidth(buttonWidth)
-      newGameButton.setHeight(buttonHeight)
-
-      newGameButton.setPosition(lign * (numButton - offset), col)
-
-      stage.addActor(newGameButton)
-
-
-      // Register listener
-
-
-      newGameButton.addListener(new ClickListener() {
-        override def clicked(event: InputEvent, x: Float, y: Float): Unit = {
-          super.clicked(event, x, y)
-          if (newGameButton.isChecked) {
-            Logger.log(s"Button is checked $numButton")
-            grid = Grids(numButton - 1)
-            menu = false
-          }
-          else {
-            Logger.log("Button is not checked")
-
-          }
-        }
-      })
-
-    }
-
-
-    val lign1: Int = 240
-
-    var button1Select: Boolean = buttoncreate("Niveau", col = lign1, numButton = 1)
-
-    var button2Select: Boolean = buttoncreate("Niveau", col = lign1, numButton = 2)
-
-    var button3Select: Boolean = buttoncreate("Niveau", col = lign1, numButton = 3)
-
-    val lign2: Int = 620
-
-    var button4Select: Boolean = buttoncreate("Niveau", col = lign2, numButton = 4, offset = 3)
-
-    var button5Select: Boolean = buttoncreate("Niveau", col = lign2, numButton = 5, offset = 3)
-
-    var button6Select: Boolean = buttoncreate("Niveau", col = lign2, numButton = 6, offset = 3)
-
-
   }
 
 
