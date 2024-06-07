@@ -3,16 +3,13 @@ package classes
 import ch.hevs.gdx2d.components.bitmaps.Spritesheet
 import ch.hevs.gdx2d.desktop.PortableApplication
 import ch.hevs.gdx2d.lib.GdxGraphics
-import ch.hevs.gdx2d.lib.utils.Logger
-import com.badlogic.gdx.{Gdx, Input}
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.scenes.scene2d.{InputEvent, Stage}
-import com.badlogic.gdx.scenes.scene2d.ui.{Skin, TextButton, TextField}
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 
-import java.io.IOException
-import java.util.concurrent.atomic.AtomicReferenceArray
-import scala.collection.mutable
+import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.scenes.scene2d.Stage
+
+
+
 import scala.collection.mutable.ArrayBuffer
 
 
@@ -159,14 +156,14 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
 
   def automaticSolver(): Unit = {
 
-    var positionHead: Position = grid.getHeadPos
+    val positionHead: Position = grid.getHeadPos
 
     val valueHeadInt: Int = grid.gridSolution(positionHead.y)(positionHead.x).getValueInt
 
     val cellavailable: Array[Position] = grid.adjacentCell()
 
     if (cellavailable.isEmpty && grid.gridIsFinish) {
-      return
+
     }
 
     else {
@@ -208,16 +205,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     }
   }
 
-  def getValuePos(nb: Int): Position = {
-    var res: Position = new Position(0, 0)
 
-    for (y <- grid.gridSolution.indices) {
-      for (x <- grid.gridSolution(y).indices if (grid.gridSolution(y)(x).getValueInt == nb)) {
-        res = new Position(x, y)
-      }
-    }
-    res
-  }
 
   def actionKeyInput(action: Direction): Unit = {
 

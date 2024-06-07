@@ -3,11 +3,6 @@ import ch.hevs.gdx2d.components.bitmaps.Spritesheet
 import ch.hevs.gdx2d.lib.GdxGraphics
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.utils.Json
-import jdk.jfr.Percentage
-
-import java.io
-import java.io.{File, FileInputStream, FileNotFoundException, FileOutputStream, IOException, ObjectInputStream, ObjectOutputStream}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
@@ -50,12 +45,12 @@ class Grid(x: Int, y: Int) extends Serializable {
       }
 
       if(action.isInstanceOf[South]){
-        var headPos:Position = oldGrid.getHeadPos
+        val headPos:Position = oldGrid.getHeadPos
         g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - width/2 -((y/2 )+ yStart + (headPos.y-1) * width),width,y,0,Color.valueOf("ffeb00"))
         g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.valueOf("ffeb00"))
         g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width - width/2).toFloat,  (g.getScreenHeight - (y+yStart + headPos.y * width)- width/2).toFloat,width.toFloat,width.toFloat)
       } else {
-        var headPos: Position = oldGrid.getHeadPos
+        val headPos: Position = oldGrid.getHeadPos
         g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.valueOf("ffeb00"))
         g.drawFilledRectangle(xStart + headPos.x * width + x/2 +width/2, g.getScreenHeight - (yStart + headPos.y * width), x, width, 0, Color.valueOf("ffeb00"))
         g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width  + x - width/2).toFloat, (g.getScreenHeight - (yStart + headPos.y * width)-width/2).toFloat,width.toFloat,width.toFloat)
@@ -68,12 +63,12 @@ class Grid(x: Int, y: Int) extends Serializable {
 
       }
       if(action.isInstanceOf[North]) {
-        var headPos: Position = oldGrid.getHeadPos
+        val headPos: Position = oldGrid.getHeadPos
         g.drawFilledRectangle(xStart + headPos.x * width, g.getScreenHeight - y / 2 +  width / 2 - ( + yStart + headPos.y * width), width, -y, 0, Color.valueOf("ffeb00"))
         g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.valueOf("ffeb00"))
         g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width - width/2).toFloat,  (g.getScreenHeight - (y+yStart + headPos.y * width)- width/2).toFloat,width.toFloat,width.toFloat)
       } else {
-        var headPos: Position = oldGrid.getHeadPos
+        val headPos: Position = oldGrid.getHeadPos
         g.drawFilledRectangle(xStart + headPos.x * width + x / 2 - width / 2, g.getScreenHeight - (yStart + headPos.y * width), -x, width, 0, Color.valueOf("ffeb00"))
         g.drawFilledRectangle(xStart + headPos.x * width,  g.getScreenHeight - (yStart + headPos.y * width),width,width,0,Color.valueOf("ffeb00"))
         g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width + x - width/2).toFloat , (g.getScreenHeight - (yStart + headPos.y * width)-width/2).toFloat,width.toFloat,width.toFloat)
@@ -122,7 +117,7 @@ class Grid(x: Int, y: Int) extends Serializable {
     catAnim += 1
   }
 
-  def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = grid, visible : Boolean = false): Unit = {
+  def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = grid,visible : Boolean = false): Unit = {
     var ligne : String = ""
     for(i <- gridIn){
       ligne += "-----"
@@ -163,10 +158,10 @@ class Grid(x: Int, y: Int) extends Serializable {
 
 
   def headCanMove(): Boolean = {
-    var headX: Int = getHeadPos.x
-    var headY: Int = getHeadPos.y
+    val headX: Int = getHeadPos.x
+    val headY: Int = getHeadPos.y
 
-    var actions: Array[Direction] = Array(North(), South(), East(), West())
+    val actions: Array[Direction] = Array(North(), South(), East(), West())
 
     for (action <- actions) {
       if (!(action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0)) {
@@ -191,8 +186,8 @@ class Grid(x: Int, y: Int) extends Serializable {
       moveInv(action)
     }
     else {
-      var headX: Int = getHeadPos.x
-      var headY: Int = getHeadPos.y
+      val headX: Int = getHeadPos.x
+      val headY: Int = getHeadPos.y
 
       if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0) {
         return 0
@@ -210,8 +205,8 @@ class Grid(x: Int, y: Int) extends Serializable {
 
 
   def moveInv(action: Direction): Int = {
-    var headX: Int = getHeadPos.x
-    var headY: Int = getHeadPos.y
+    val headX: Int = getHeadPos.x
+    val headY: Int = getHeadPos.y
 
     if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0) {
       return 0
@@ -230,7 +225,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   def getHeadPos: Position = {
     var res: Position = new Position(0, 0)
-    var maxVal: Int = 0;
+    var maxVal: Int = 0
     for (y <- grid.indices) {
       for (x <- grid(y).indices if (grid(y)(x).getValueInt > maxVal)) {
 
@@ -271,8 +266,8 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   // Fonction pour avoir les localisations des différentes cellules adjacentes possibles, pour ce déplacer
   def adjacentCell(): Array[Position] = {
-    var headX: Int = getHeadPos.x
-    var headY: Int = getHeadPos.y
+    val headX: Int = getHeadPos.x
+    val headY: Int = getHeadPos.y
 
     val listAdjacentCell: ArrayBuffer[Position] = new ArrayBuffer[Position]()
 
@@ -340,7 +335,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   def stayInTheGrid(nb: Int, typ: Char): Int = {
     var sup: Int = 0
-    var nb1: Int = notNegative(nb)
+    val nb1: Int = notNegative(nb)
 
     if (typ == 'C') {
       sup = grid.length
@@ -436,7 +431,7 @@ if(!findsol) {
     var initialAvailableCells: ArrayBuffer[Position] = adjacentCell().to(ArrayBuffer)
 
     // Si il reste des cellules ajacentes à tester, si on a fait un appel récursif
-    var saveInitialAvailableCellsArrayFinal: ArrayBuffer[Position] = saveInitialAvailableCellsArray.clone
+    val saveInitialAvailableCellsArrayFinal: ArrayBuffer[Position] = saveInitialAvailableCellsArray.clone
 
     if (saveInitialAvailableCellsArray.nonEmpty) {
       initialAvailableCells = saveInitialAvailableCellsArray
