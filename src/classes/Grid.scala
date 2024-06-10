@@ -399,38 +399,32 @@ class Grid(x: Int, y: Int) extends Serializable {
   // Initialiser la postion de départ
   private val posDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
-  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer(),findsol : Boolean = false): Boolean = {
+  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer(), maxDepth: Int = 1000, currentDepth: Int = 0): Boolean = {
+    if (currentDepth > maxDepth) {
+      return false
+    }
 
+    // Initialisation sur la grille
+    grid(posDepart.y)(posDepart.x).setValueInt(1)
 
-if(!findsol) {
-  // Initialisiation sur la grille
-  grid(posDepart.y)(posDepart.x).setValueInt(1)
-
-
-  // création d'obstacles imposés
-  var counterObstacles: Int = 0
-  if (nbObstacleInit > 0) {
-    while (counterObstacles < nbObstacleInit) {
-      val posXObs: Int = (math.random() * grid(0).length - 1).toInt
-
-
-      val posYObs: Int = (math.random() * grid.length - 1).toInt
-
-      val value: Cellule = grid(posYObs)(posXObs)
-      if (!value.isObstacl && value.getValueInt < 1) {
-
-        grid(posYObs)(posXObs).isObstacl = true
-
-        counterObstacles += 1
+    // création d'obstacles imposés
+    var counterObstacles: Int = 0
+    if (nbObstacleInit > 0) {
+      while (counterObstacles < nbObstacleInit) {
+        val posXObs: Int = (math.random() * grid(0).length - 1).toInt
+        val posYObs: Int = (math.random() * grid.length - 1).toInt
+        val value: Cellule = grid(posYObs)(posXObs)
+        if (!value.isObstacl && value.getValueInt < 1) {
+          grid(posYObs)(posXObs).isObstacl = true
+          counterObstacles += 1
+        }
       }
     }
-  }
-}
 
-    // Initialistion direction de départ
+    // Initialisation direction de départ
     var initialAvailableCells: ArrayBuffer[Position] = adjacentCell().to(ArrayBuffer)
 
-    // Si il reste des cellules ajacentes à tester, si on a fait un appel récursif
+    // Si il reste des cellules adjacentes à tester, si on a fait un appel récursif
     val saveInitialAvailableCellsArrayFinal: ArrayBuffer[Position] = saveInitialAvailableCellsArray.clone
 
     if (saveInitialAvailableCellsArray.nonEmpty) {
@@ -438,11 +432,9 @@ if(!findsol) {
     }
 
     if (initialAvailableCells.nonEmpty) {
-
       val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
 
-
-      // On sauvegarde les autres cellules adjacentes non utilisees
+      // On sauvegarde les autres cellules adjacentes non utilisées
       if (saveInitialAvailableCellsArrayFinal.nonEmpty) {
         saveInitialAvailableCellsArrayFinal.remove(randomNb)
       }
@@ -453,85 +445,71 @@ if(!findsol) {
     }
 
     def find(): Boolean = {
-
-
       // Trouver les nouvelles cellules adjacentes après le 1er mouvement
-      // On mélange les solutions, pour éviter qu'il tourne toujours de la même manière
+      // On mélange les solutions pour éviter qu'il tourne toujours de la même manière
       val nextAvailableCells: Array[Position] = Random.shuffle(adjacentCell().toSeq).toArray
 
-      if (occupation() > percentageCoverGrid && nextAvailableCells.length == 0) {
+      if (occupation() > percentageCoverGrid && nextAvailableCells.isEmpty) {
         return true
-      }
-      else if (nextAvailableCells.length == 0) {
+      } else if (nextAvailableCells.isEmpty) {
         return false
-      }
-      else {
+      } else {
         for (candidat: Position <- nextAvailableCells) {
-
           val saveGrid: ArrayBuffer[ArrayBuffer[Cellule]] = grid.clone()
 
           moveWithAdjacentCell(candidat)
 
           if (find()) {
             return true
-          }
-
-          else {
+          } else {
             grid = saveGrid
             return false
           }
-
         }
-
         return false
       }
     }
 
-
     if (find()) {
-     // println(s"Rempli à: ${(occupation() * 100).toInt} %")
+      println(s"Rempli à: ${(occupation() * 100).toInt} %")
 
-      //On remplit les trous avec la fonction ci-dessous
+      // On remplit les trous avec la fonction ci-dessous
       fillGridWith()
 
-      //On sauvegarde la Solution
+      // On sauvegarde la solution
       cloneGrid()
 
-      //On efface le chemin
+      // On efface le chemin
       resetGrid()
 
-      return true
-    }
-    else {
-      // Si pas de solution
+      println("------------------------------")
 
+      return true
+    } else {
+      // Si pas de solution
       if (saveInitialAvailableCellsArrayFinal.nonEmpty) {
-        //On efface le chemin testé
+        // On efface le chemin testé
         resetGrid()
 
-        //Appel récursif pour essayer une nouvelle direction, avec le même point de départ
-        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal)) {
+        // Appel récursif pour essayer une nouvelle direction, avec le même point de départ.
+        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal, maxDepth, currentDepth + 1)) {
+          return true
+        } else {
           return true
         }
-        else {
-          return true
-        }
-      }
-
-      else {
-        // Si toutes les directions pour un même départ ne donne pas de solution
-        //New Grid
+      } else {
+        // Si toutes les directions pour un même départ ne donnent pas de solution
+        // New Grid
         fillGridWith("Vide")
 
         // Initialiser une nouvelle position de départ
         val newDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
-        //Appel récursif pour essayer une nouvelle postion de départ
-        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom)) {
+        // Appel récursif pour essayer une nouvelle position de départ
+        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom, maxDepth = maxDepth, currentDepth = currentDepth + 1)) {
           return true
-        }
-
-        else {
+        } else {
+          resetGrid()
           return false
         }
       }
