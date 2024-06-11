@@ -14,24 +14,20 @@ object application extends App {
 }
 
 class SquatterGrid() extends PortableApplication(1920, 1200) {
-
-  private var nbLvl: Int = 1
-  var grid: Grid = null
-  private var line: Int = 0
-  var column: Int = 0
-
-  var action: Direction = null
   private var haveMove: Boolean = false
-  var oldGrid: Grid = null
-  var nbMove: Int = 0
-
+  private var nbLvl: Int = 1
+  private var line: Int = 0
   private var isShaking: Boolean = false
   private var nbShake: Int = 0
-
-  var catSs: Spritesheet = null
   private var solutionVisible: Boolean = false
+  private val listeTouchesSauv: ArrayBuffer[Direction] = new ArrayBuffer[Direction]()
 
-  private var listeTouchesSauv: ArrayBuffer[Direction] = new ArrayBuffer[Direction]()
+  var grid: Grid = null
+  var column: Int = 0
+  var catSs: Spritesheet = null
+  var action: Direction = null
+  var oldGrid: Grid = null
+  var nbMove: Int = 0
 
   private def restartGame(): Unit = {
     grid.resetGrid()
@@ -83,8 +79,8 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
 
       case Input.Keys.SPACE =>
 
-          if (grid.gridIsFinish) {
-            if (!grid.headCanMove()) {
+          if (!grid.headCanMove()) {
+            if (grid.gridIsFinish) {
               if (nbLvl == 50) {
                 line = 4
                 column = 4
@@ -97,8 +93,10 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
               nbLvl += 1
 
             stratGame(line, column)
-          } else
+          }
+          else {
             restartGame()
+          }
         }
 
       // Touche pour voir la solution dans la console de la grille
@@ -197,7 +195,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       if (y == headPos.y && x == headPos.x)
         g.draw(catSs.sprites(0)(0), (posShake + xStart + x * width - width / 2).toFloat, (g.getScreenHeight - (posShake + yStart + y * width) - width / 2).toFloat, width.toFloat, width.toFloat)
       else if (in.grid(y)(x).isObstacl)
-        g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("48d055"))
+        g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("43cf64"))
       else if (in.grid(y)(x).getValueInt > 0)
         g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("ffeb00"))
       else
@@ -219,7 +217,7 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       catSs = new Spritesheet("data/images/CHAT.png", 8, 8)
     }
 
-    g.setBackgroundColor(Color.valueOf("48d055"))
+    g.setBackgroundColor(Color.valueOf("43cf64"))
 
     if (haveMove) {
       val width: Int = g.getScreenHeight / (grid.grid.length + 2)
