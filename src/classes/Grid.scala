@@ -100,7 +100,7 @@ class Grid(x: Int, y: Int) extends Serializable {
         }
       }
       else if (in.grid(y)(x).isObstacl) {
-        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.valueOf("48d055"))
+        g.drawFilledRectangle(xStart + x * width, g.getScreenHeight - (yStart + y * width), width, width, 0, Color.valueOf("43cf64"))
       } else if (in.grid(y)(x).getValueInt > 0) {
         g.drawFilledRectangle(xStart + x * width, g.getScreenHeight -  (yStart + y * width), width, width, 0, Color.valueOf("ffeb00"))
       } else {
