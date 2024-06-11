@@ -6,27 +6,22 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-
 class Grid(x: Int, y: Int) extends Serializable {
 
-
-  var grid: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
-
+  var grid:ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
   var gridSolution: ArrayBuffer[ArrayBuffer[Cellule]] = ArrayBuffer()
-
-  var gridSolutionString : String = ""
-
+  var gridSolutionString :String = ""
+  private var catAnim:Int = 0
 
   for (idy <- 0 until y) {
     grid.addOne(new ArrayBuffer[Cellule]())
-    for (idx <- 0 until x) {
+    for (_ <- 0 until x) {
       grid(idy).addOne(new Cellule())
     }
   }
 
-
   def resetGrid(): Unit = {
-    for (y <- grid.indices; x <- grid(y).indices if (grid(y)(x).getValueInt != 0 && grid(y)(x).getValueInt != 1)) {
+    for (y <- grid.indices; x <- grid(y).indices if grid(y)(x).getValueInt != 0 && grid(y)(x).getValueInt != 1) {
       grid(y)(x).setValueInt(0)
     }
   }
@@ -39,7 +34,7 @@ class Grid(x: Int, y: Int) extends Serializable {
     displayWin(g,oldGrid,catSs)
 
     if(action.isInstanceOf[South] || action.isInstanceOf[East]){
-      if (x >= (nbMove) * width || y >= nbMove * width) {
+      if (x >= nbMove * width || y >= nbMove * width) {
         displayWin(g,catSs = catSs)
         return true
       }
@@ -74,14 +69,12 @@ class Grid(x: Int, y: Int) extends Serializable {
         g.draw(catSs.sprites(0)(0),(xStart + headPos.x * width + x - width/2).toFloat , (g.getScreenHeight - (yStart + headPos.y * width)-width/2).toFloat,width.toFloat,width.toFloat)
       }
     }
-
     false
   }
-  var catAnim:Int = 0
+
   def displayWin(g: GdxGraphics, in: Grid = this,catSs:Spritesheet): Unit = {
 
     g.drawString(60,400,gridSolutionString, new BitmapFont(),45)
-
 
     if(catAnim > 200){
       catAnim = 0
@@ -119,7 +112,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
   def display(gridIn: ArrayBuffer[ArrayBuffer[Cellule]] = grid,visible : Boolean = false): Unit = {
     var ligne : String = ""
-    for(i <- gridIn){
+    for(_ <- gridIn){
       ligne += "-----"
     }
     print("\r")
@@ -134,12 +127,10 @@ class Grid(x: Int, y: Int) extends Serializable {
             }
             else {
               res += "|" + value + " |"
-
             }
           } else {
             res += "| 0 |"
           }
-
         }
         else {
           res += "| X |"
@@ -155,12 +146,10 @@ class Grid(x: Int, y: Int) extends Serializable {
     print(res)
   }
 
-
-
   def headCanMove(): Boolean = {
+
     val headX: Int = getHeadPos.x
     val headY: Int = getHeadPos.y
-
     val actions: Array[Direction] = Array(North(), South(), East(), West())
 
     for (action <- actions) {
@@ -175,7 +164,7 @@ class Grid(x: Int, y: Int) extends Serializable {
   }
 
   def gridIsFinish: Boolean = {
-    for (y <- grid.indices; x <- grid(y).indices if (grid(y)(x).getValueInt == 0 && !grid(y)(x).isObstacl)) {
+    for (y <- grid.indices; x <- grid(y).indices if grid(y)(x).getValueInt == 0 && !grid(y)(x).isObstacl) {
       return false
     }
     true
@@ -189,46 +178,36 @@ class Grid(x: Int, y: Int) extends Serializable {
       val headX: Int = getHeadPos.x
       val headY: Int = getHeadPos.y
 
-      if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0) {
-        return 0
-      }
-
-      else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter) {
-        return 0
-      }
+      if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0)
+        0
+      else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
+        0
       else {
         grid(headY + action.actionY)(headX + action.actionX).setValueInt(grid(headY)(headX).getValueInt + 1)
-        return 1 + move(action)
+        1 + move(action)
       }
     }
   }
 
-
-  def moveInv(action: Direction): Int = {
+  private def moveInv(action: Direction): Int = {
     val headX: Int = getHeadPos.x
     val headY: Int = getHeadPos.y
 
-    if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0) {
-      return 0
-    }
-
-    else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || !grid(headY + action.actionY)(headX + action.actionX).haveSquatter) {
-      return 0
-    }
+    if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0)
+      0
+    else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || !grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
+      0
     else {
       grid(headY + action.actionY)(headX + action.actionX).setValueInt(0)
-      return 1 + move(action)
+      1 + move(action)
     }
   }
-
-
 
   def getHeadPos: Position = {
     var res: Position = new Position(0, 0)
     var maxVal: Int = 0
     for (y <- grid.indices) {
-      for (x <- grid(y).indices if (grid(y)(x).getValueInt > maxVal)) {
-
+      for (x <- grid(y).indices if grid(y)(x).getValueInt > maxVal) {
         maxVal = grid(y)(x).getValueInt
         res = new Position(x, y)
       }
@@ -236,32 +215,23 @@ class Grid(x: Int, y: Int) extends Serializable {
     res
   }
 
-
-
-
   // Fonction pour calculer le pourcentage d'occupation de la surface par le "Squatter"
-  def occupation(): Double = {
+  private def occupation(): Double = {
     var counter: Double = 0
     var counterObstacle: Double = 0
-    val surfaceInit: Double = (grid.length) * (grid(0).length)
+    val surfaceInit: Double = grid.length * grid(0).length
 
     for (lign: Int <- grid.indices) {
       for (column: Int <- grid(lign).indices) {
         val value: Cellule = grid(lign)(column)
 
-
-        if (value.getValueInt != 0 && !value.isObstacl) {
+        if (value.getValueInt != 0 && !value.isObstacl)
           counter += 1.0
-        }
-
-        else if (value.isObstacl) {
+        else if (value.isObstacl)
           counterObstacle += 1
-        }
-
       }
     }
-
-    return ((counter) / (surfaceInit - counterObstacle))
+    counter / (surfaceInit - counterObstacle)
   }
 
   // Fonction pour avoir les localisations des différentes cellules adjacentes possibles, pour ce déplacer
@@ -271,7 +241,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
     val listAdjacentCell: ArrayBuffer[Position] = new ArrayBuffer[Position]()
 
-    for (i: Int <- -1 to 1; if (i != 0)) {
+    for (i: Int <- -1 to 1; if i != 0) {
 
       val headYC: Int = stayInTheGrid(headY + i, 'C')
       val headXC: Int = stayInTheGrid(headX + i, 'L')
@@ -282,105 +252,77 @@ class Grid(x: Int, y: Int) extends Serializable {
       val moveRL: Cellule = grid(posRL.y)(posRL.x)
       val moveUD: Cellule = grid(posUD.y)(posUD.x)
 
-      if (!moveRL.haveSquatter && !moveRL.isObstacl && headX + i == headXC) {
+      if (!moveRL.haveSquatter && !moveRL.isObstacl && headX + i == headXC)
         listAdjacentCell.addOne(posRL)
-      }
-      if (!moveUD.haveSquatter && !moveUD.isObstacl && headY + i == headYC) {
+      if (!moveUD.haveSquatter && !moveUD.isObstacl && headY + i == headYC)
         listAdjacentCell.addOne(posUD)
-      }
-
     }
 
-    return listAdjacentCell.toArray
+    listAdjacentCell.toArray
   }
 
   // Fonction pour faire le mouvement réalisé avec la position donné d'une cellule adjacente
-  def moveWithAdjacentCell(pos: Position): Unit = {
+  private def moveWithAdjacentCell(pos: Position): Unit = {
 
     val headX: Int = getHeadPos.x
     val headY: Int = getHeadPos.y
-
-
     val xMove: Int = pos.x - headX
     val yMove: Int = pos.y - headY
 
     // 1er Mouvement
     if (yMove != 0 || xMove != 0) {
       if (yMove == 0) {
-        if (xMove < 0) {
+        if (xMove < 0)
           move(West())
-        }
-        else {
+        else
           move(East())
-        }
       }
       else {
-        if (yMove < 0) {
+        if (yMove < 0)
           move(North())
-        }
-        else {
+        else
           move(South())
-        }
       }
     }
   }
 
   // Fonction qui permet de remplacer un chiffre négatif, par 0. Utilisé dans la fonction adjacentCell(), pour ne pas avoir de coordonnée négative
-  def notNegative(nb: Int): Int = {
-    if (nb >= 0) {
-      return nb
-    }
-    else return 0
-  }
+  private def notNegative(nb: Int): Int = if (nb >= 0) nb else 0
 
-  def stayInTheGrid(nb: Int, typ: Char): Int = {
+  private def stayInTheGrid(nb: Int, typ: Char): Int = {
     var sup: Int = 0
     val nb1: Int = notNegative(nb)
 
-    if (typ == 'C') {
+    if (typ == 'C')
       sup = grid.length
-    }
-    else {
+    else
       sup = grid(0).length
-    }
 
-    if (nb >= sup) {
-      return sup - 1
-    }
-    else return nb1
+    if (nb >= sup) sup -1 else nb1
   }
 
-
   // Fonction pour finir de remplir la grille avec des obstacles ( 0 remplacé par un obstacle)
-  def fillGridWith(what: String = "Obstacle"): Unit = {
+  private def fillGridWith(what: String = "Obstacle"): Unit = {
     for (lign: Int <- grid.indices) {
       for (column: Int <- grid(lign).indices) {
         val value: Cellule = grid(lign)(column)
 
         what match {
-          case "Obstacle" => {
-            if (value.getValueInt == 0) {
+          case "Obstacle" =>
+            if (value.getValueInt == 0)
               grid(lign)(column).isObstacl = true
-            }
-          }
 
-          case "Vide" => {
-            {
-              grid(lign)(column).isObstacl = false
-              grid(lign)(column).setValueInt(0)
-            }
-          }
+          case "Vide" =>
+            grid(lign)(column).isObstacl = false
+            grid(lign)(column).setValueInt(0)
         }
-
       }
     }
-
-
   }
 
 
   // Méthode pour faire une copie de la solution, afin d'éviter le pb avec la methode .clone
-  def cloneGrid(): Unit = {
+  private def cloneGrid(): Unit = {
     for (lign: Int <- grid.indices) {
       val lignArrayB: ArrayBuffer[Cellule] = new ArrayBuffer[Cellule]()
       for (column: Int <- grid(lign).indices) {
@@ -391,18 +333,13 @@ class Grid(x: Int, y: Int) extends Serializable {
     }
   }
 
-
-
-
-
-
   // Initialiser la postion de départ
   private val posDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
-  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer(), maxDepth: Int = 1000, currentDepth: Int = 0): Boolean = {
-    if (currentDepth > maxDepth) {
+  def generateGrid(percentageCoverGrid: Double = 0.8, nbObstacleInit: Int = 0, posDepart: Position = posDepartRandom, saveInitialAvailableCellsArray: ArrayBuffer[Position] = ArrayBuffer(), maxDepth: Int = 10000, currentDepth: Int = 0): Boolean = {
+    if (currentDepth > maxDepth)
       return false
-    }
+
 
     // Initialisation sur la grille
     grid(posDepart.y)(posDepart.x).setValueInt(1)
@@ -427,17 +364,17 @@ class Grid(x: Int, y: Int) extends Serializable {
     // Si il reste des cellules adjacentes à tester, si on a fait un appel récursif
     val saveInitialAvailableCellsArrayFinal: ArrayBuffer[Position] = saveInitialAvailableCellsArray.clone
 
-    if (saveInitialAvailableCellsArray.nonEmpty) {
+    if (saveInitialAvailableCellsArray.nonEmpty)
       initialAvailableCells = saveInitialAvailableCellsArray
-    }
+
 
     if (initialAvailableCells.nonEmpty) {
       val randomNb: Int = (math.random * (initialAvailableCells.length - 1)).toInt
 
       // On sauvegarde les autres cellules adjacentes non utilisées
-      if (saveInitialAvailableCellsArrayFinal.nonEmpty) {
+      if (saveInitialAvailableCellsArrayFinal.nonEmpty)
         saveInitialAvailableCellsArrayFinal.remove(randomNb)
-      }
+
 
       // 1er Mouvement
       val initialMove: Position = initialAvailableCells(randomNb)
@@ -449,24 +386,24 @@ class Grid(x: Int, y: Int) extends Serializable {
       // On mélange les solutions pour éviter qu'il tourne toujours de la même manière
       val nextAvailableCells: Array[Position] = Random.shuffle(adjacentCell().toSeq).toArray
 
-      if (occupation() > percentageCoverGrid && nextAvailableCells.isEmpty) {
-        return true
-      } else if (nextAvailableCells.isEmpty) {
-        return false
-      } else {
+      if (occupation() > percentageCoverGrid && nextAvailableCells.isEmpty)
+        true
+      else if (nextAvailableCells.isEmpty)
+        false
+      else {
         for (candidat: Position <- nextAvailableCells) {
           val saveGrid: ArrayBuffer[ArrayBuffer[Cellule]] = grid.clone()
 
           moveWithAdjacentCell(candidat)
 
-          if (find()) {
+          if (find())
             return true
-          } else {
+          else {
             grid = saveGrid
             return false
           }
         }
-        return false
+        false
       }
     }
 
@@ -484,7 +421,7 @@ class Grid(x: Int, y: Int) extends Serializable {
 
       println("------------------------------")
 
-      return true
+      true
     } else {
       // Si pas de solution
       if (saveInitialAvailableCellsArrayFinal.nonEmpty) {
@@ -492,12 +429,12 @@ class Grid(x: Int, y: Int) extends Serializable {
         resetGrid()
 
         // Appel récursif pour essayer une nouvelle direction, avec le même point de départ.
-        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal, maxDepth, currentDepth + 1)) {
-          return true
-        } else {
-          return true
-        }
+        if (generateGrid(percentageCoverGrid, 0, posDepart, saveInitialAvailableCellsArrayFinal, maxDepth, currentDepth + 1))
+          true
+        else
+          true
       } else {
+
         // Si toutes les directions pour un même départ ne donnent pas de solution
         // New Grid
         fillGridWith("Vide")
@@ -506,11 +443,11 @@ class Grid(x: Int, y: Int) extends Serializable {
         val newDepartRandom: Position = new Position((math.random() * grid(0).length - 1).toInt, (math.random() * grid.length - 1).toInt)
 
         // Appel récursif pour essayer une nouvelle position de départ
-        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom, maxDepth = maxDepth, currentDepth = currentDepth + 1)) {
-          return true
-        } else {
+        if (generateGrid(percentageCoverGrid, nbObstacleInit, newDepartRandom, maxDepth = maxDepth, currentDepth = currentDepth + 1))
+          true
+        else {
           resetGrid()
-          return false
+          false
         }
       }
     }

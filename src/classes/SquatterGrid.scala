@@ -3,105 +3,66 @@ package classes
 import ch.hevs.gdx2d.components.bitmaps.Spritesheet
 import ch.hevs.gdx2d.desktop.PortableApplication
 import ch.hevs.gdx2d.lib.GdxGraphics
-
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.scenes.scene2d.Stage
-
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import scala.collection.mutable.ArrayBuffer
 
-
 object application extends App {
-
-  def launch(lineS: Int = 3, colS: Int = 3, attempt: Int = 0): Unit = {
-    val maxAttempts = 3
-    var game: SquatterGrid = new SquatterGrid()
-
-    try {
-      game.stratCmdGame(lineS, colS, 0)
-      println(s"Game started with dimensions: ${game.line} x ${game.column}")
-    } catch {
-      case e: StackOverflowError =>
-        if (attempt < maxAttempts) {
-          println(s"StackOverflowError encountered. Attempting again (Attempt ${attempt + 1}/$maxAttempts)...")
-          launch(lineS, colS, attempt + 1)
-        } else {
-          println("Max attempts reached. Unable to start the game.")
-        }
-    }
-  }
-
-  // Start the game
-  launch()
-
+  val game: SquatterGrid = new SquatterGrid()
+  game.stratGame(4,4)
 }
 
 class SquatterGrid() extends PortableApplication(1920, 1200) {
 
-  var nbLvl: Int = 1
+  private var nbLvl: Int = 1
   var grid: Grid = null
-  var line: Int = 0
+  private var line: Int = 0
   var column: Int = 0
-  var obsacl: Int = 0
 
   var action: Direction = null
-  var haveMove: Boolean = false
+  private var haveMove: Boolean = false
   var oldGrid: Grid = null
   var nbMove: Int = 0
 
-  var isShaking: Boolean = false
-  var nbShake: Int = 0
+  private var isShaking: Boolean = false
+  private var nbShake: Int = 0
 
   var catSs: Spritesheet = null
+  private var solutionVisible: Boolean = false
 
-  var solutionVisible: Boolean = false
-  //var newGameButton
+  private var listeTouchesSauv: ArrayBuffer[Direction] = new ArrayBuffer[Direction]()
 
-  var listeTouchesSauv: ArrayBuffer[Direction] = new ArrayBuffer[Direction]()
-
-  def restartCmdGame(): Unit = {
-    // println(s"taille: $line x $column, obstacles: $obsacl")
+  private def restartGame(): Unit = {
     grid.resetGrid()
-    //grid.display()
   }
 
-  def stratCmdGame(line: Int, column: Int, obstacl: Int): Unit = {
+  def stratGame(line: Int, column: Int): Unit = {
     this.line = line
     this.column = column
-    // println(s"taille: $line x $column, obstacles: $obsacl")
     grid = new Grid(line, column)
 
     var isGenerer: Boolean = false
-    while (!isGenerer) {
-      try {
-        val miniArea: Double = 0.5
-        var area: Double = math.random
-        if (area < miniArea) {
-          area = miniArea
-        }
-        val miniObs: Int = 1
-        val maxObs: Int = (line * column * 0.1).toInt
-        var nbObs: Int = (math.random * maxObs).toInt
-        if (nbObs < miniObs) {
-          nbObs = miniObs
-        }
 
-        grid.generateGrid(percentageCoverGrid = area, nbObstacleInit = nbObs)
+    val miniArea: Double = 0.5
+    var area: Double = math.random
+    if (area < miniArea)
+      area = miniArea
 
-        isGenerer = true
+    val miniObs: Int = 1
+    val maxObs: Int = (line * column * 0.1).toInt
+    var nbObs: Int = (math.random * maxObs).toInt
+    if (nbObs < miniObs)
+      nbObs = miniObs
 
-      }
-    }
+    grid.generateGrid(percentageCoverGrid = area, nbObstacleInit = nbObs)
 
-    //grid.display()
+    isGenerer = true
   }
 
-  var stage: Stage = null
 
   override def onInit(): Unit = {
     setTitle("Squatter Grid")
-    stage = new Stage
-
   }
 
   override def onKeyDown(keycode: Int): Unit = {
@@ -122,52 +83,43 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
 
       case Input.Keys.SPACE =>
 
-        if (!grid.headCanMove()) {
           if (grid.gridIsFinish) {
-            if (nbLvl % 6 == 0) {
-              line += 1
-              nbLvl = 0
-              obsacl = 0
-            } else if (nbLvl % 4 == 0) {
-              column += 1
-            }
-            if (nbLvl % 2 == 0) {
-              obsacl += 1
-            }
-            nbLvl += 1
+            if (!grid.headCanMove()) {
+              if (nbLvl == 50) {
+                line = 4
+                column = 4
+                nbLvl = 0
+              }
+              if (nbLvl % 10 == 0)
+                column += 1
+              else if (nbLvl % 5 == 0)
+                line += 1
+              nbLvl += 1
 
-            stratCmdGame(line, column, obsacl)
-          } else {
-            restartCmdGame()
-          }
-
+            stratGame(line, column)
+          } else
+            restartGame()
         }
 
       // Touche pour voir la solution dans la console de la grille
       case Input.Keys.S => grid.display(grid.gridSolution, true)
-        if (!solutionVisible) {
-          solutionVisible = true
-        }
-        else solutionVisible = false
+        solutionVisible = !solutionVisible
+      if(!solutionVisible)
+        grid.gridSolutionString = ""
 
       case Input.Keys.A => automaticSolver()
       case _ =>
     }
   }
 
-  def automaticSolver(): Unit = {
+  private def automaticSolver(): Unit = {
 
     val positionHead: Position = grid.getHeadPos
-
     val valueHeadInt: Int = grid.gridSolution(positionHead.y)(positionHead.x).getValueInt
 
     val cellavailable: Array[Position] = grid.adjacentCell()
 
-    if (cellavailable.isEmpty && grid.gridIsFinish) {
-
-    }
-
-    else {
+    if (!(cellavailable.isEmpty && grid.gridIsFinish)) {
 
       for (pos: Int <- cellavailable.indices) {
         val cellTest: Position = cellavailable(pos)
@@ -178,73 +130,52 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
           // 1er Mouvement
           if (yMove != 0 || xMove != 0) {
             if (yMove == 0) {
-              if (xMove < 0) {
-
-                actionKeyInput((West()))
-              }
-              else {
+              if (xMove < 0)
+                actionKeyInput(West())
+              else
                 actionKeyInput(East())
-
-
-              }
             }
             else {
-              if (yMove < 0) {
-
-                actionKeyInput((North()))
-
-              }
-              else {
-                actionKeyInput((South()))
-
-              }
+              if (yMove < 0)
+                actionKeyInput(North())
+              else
+                actionKeyInput(South())
             }
           }
         }
-
       }
     }
   }
 
+  private def actionKeyInput(action: Direction): Unit = {
 
-  def actionKeyInput(action: Direction): Unit = {
-
-    if (haveMove || isShaking) {
+    if (haveMove)
       return
-    }
-
     oldGrid = new Grid(grid.grid(0).length, grid.grid.length)
-    for (y <- grid.grid.indices; x <- grid.grid(y).indices) {
+    for (y <- grid.grid.indices; x <- grid.grid(y).indices)
       oldGrid.grid(y)(x) = new Cellule(grid.grid(y)(x).isObstacl, grid.grid(y)(x).haveSquatter, grid.grid(y)(x).getValueInt)
-    }
-
 
     nbMove = grid.move(action)
 
     if (nbMove != 0) {
       haveMove = true
       this.action = action
-      // grid.display()
       controlStatGame()
     }
-
   }
 
-
-  def controlStatGame(): Unit = {
+  private def controlStatGame(): Unit = {
     if (!grid.headCanMove()) {
-      if (grid.gridIsFinish) {
+      if (grid.gridIsFinish)
         println("You Win! \n press space to go to the next level.")
-        nbLvl += 1
-      }
-      else {
+      else
         println("You lose :( \n press space to restart.")
-      }
     }
   }
 
+  private def shake(g: GdxGraphics, nbShake: Int, in: Grid = grid): Boolean = {
 
-  def shake(g: GdxGraphics, nbShake: Int, in: Grid = grid): Boolean = {
+    g.drawString(60,400,grid.gridSolutionString, new BitmapFont(),45)
     if (this.nbShake >= nbShake) {
       in.displayWin(g, catSs = catSs)
       return true
@@ -256,26 +187,24 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     val headPos: Position = in.getHeadPos
 
     val posShake: Int = this.nbShake match {
-      case (1 | 2 | 3) => 10
-      case (4 | 5 | 6) => 0
-      case (7 | 8 | 9) => -10
+      case 1 | 2 | 3 => 10
+      case 4 | 5 | 6 => 0
+      case 7 | 8 | 9 => -10
       case _ => 0
     }
 
     for (y <- in.grid.indices; x <- in.grid(y).indices) {
-      if (y == headPos.y && x == headPos.x) {
+      if (y == headPos.y && x == headPos.x)
         g.draw(catSs.sprites(0)(0), (posShake + xStart + x * width - width / 2).toFloat, (g.getScreenHeight - (posShake + yStart + y * width) - width / 2).toFloat, width.toFloat, width.toFloat)
-      }
-      else if (in.grid(y)(x).isObstacl) {
+      else if (in.grid(y)(x).isObstacl)
         g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("48d055"))
-      } else if (in.grid(y)(x).getValueInt > 0) {
+      else if (in.grid(y)(x).getValueInt > 0)
         g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("ffeb00"))
-      } else {
+      else
         g.drawFilledRectangle(posShake + xStart + x * width, g.getScreenHeight - (posShake + yStart + y * width), width, width, 0, Color.valueOf("e1755a"))
-      }
     }
     this.nbShake += 1
-    // print("shake")
+
     false
   }
 
@@ -315,7 +244,5 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
     }
     g.drawFPS()
     g.drawSchoolLogo()
-
   }
-
 }
