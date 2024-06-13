@@ -219,7 +219,6 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       grid.displayWin(g, catSs = catSs)
     }
     if (!haveMove) {
-
       x = 0
       y = 0
     }
