@@ -27,7 +27,7 @@ La partie s'arrête lorsque le Squatter ne peut plus choisir de direction.
 
 ## Contrôles
 - Utilisez les touches directionnelles pour déplacer le Squatter dans la grille.
-- Appuyez sur la touche espace pour indiquer que le Squatter ne peut plus avancer.
+- Appuyez sur la touche espace pour recommencer ou passer au prochain niveau quand le Squatter ne peut plus avancer.
 - La touche 'a' permet au joueur de déplacer le Squatter d'un coup dans les traces de la solution. 
 Cette touche est désactivée si le joueur n'est pas déjà dans le chemin de la solution.
 - La touche 's' permet d'afficher sur la gauche de la fenêtre la solution, en suivant le chemin indiqué du chiffre le plus petit vers le plus grand 

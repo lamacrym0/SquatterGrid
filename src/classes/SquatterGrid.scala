@@ -10,35 +10,30 @@ import scala.collection.mutable.ArrayBuffer
 
 object application extends App {
   val game: SquatterGrid = new SquatterGrid()
-  game.stratGame(4,4)
+  game.startGame(4,4)
 }
 
 class SquatterGrid() extends PortableApplication(1920, 1200) {
   private var haveMove: Boolean = false
   private var nbLvl: Int = 1
   private var line: Int = 0
+  private var column: Int = 0
   private var isShaking: Boolean = false
   private var nbShake: Int = 0
   private var solutionVisible: Boolean = false
-  private val listeTouchesSauv: ArrayBuffer[Direction] = new ArrayBuffer[Direction]()
 
   var grid: Grid = null
-  var column: Int = 0
   var catSs: Spritesheet = null
   var action: Direction = null
   var oldGrid: Grid = null
   var nbMove: Int = 0
+  var x: Int = 0
+  var y: Int = 0
 
-  private def restartGame(): Unit = {
-    grid.resetGrid()
-  }
-
-  def stratGame(line: Int, column: Int): Unit = {
+  def startGame(line: Int, column: Int): Unit = {
     this.line = line
     this.column = column
     grid = new Grid(line, column)
-
-    var isGenerer: Boolean = false
 
     val miniArea: Double = 0.5
     var area: Double = math.random
@@ -52,33 +47,25 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
       nbObs = miniObs
 
     grid.generateGrid(percentageCoverGrid = area, nbObstacleInit = nbObs)
-
-    isGenerer = true
   }
-
 
   override def onInit(): Unit = {
     setTitle("Squatter Grid")
   }
 
   override def onKeyDown(keycode: Int): Unit = {
-    // print("ok")
+
     keycode match {
       case Input.Keys.DOWN =>
-        listeTouchesSauv.addOne(South())
         actionKeyInput(South())
       case Input.Keys.UP =>
-        listeTouchesSauv.addOne(North())
         actionKeyInput(North())
       case Input.Keys.LEFT =>
-        listeTouchesSauv.addOne(West())
         actionKeyInput(West())
       case Input.Keys.RIGHT =>
-        listeTouchesSauv.addOne(East())
         actionKeyInput(East())
 
       case Input.Keys.SPACE =>
-
           if (!grid.headCanMove()) {
             if (grid.gridIsFinish) {
               if (nbLvl == 50) {
@@ -92,11 +79,10 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
                 line += 1
               nbLvl += 1
 
-            stratGame(line, column)
+            startGame(line, column)
           }
-          else {
-            restartGame()
-          }
+          else
+            grid.resetGrid()
         }
 
       // Touche pour voir la solution dans la console de la grille
@@ -205,9 +191,6 @@ class SquatterGrid() extends PortableApplication(1920, 1200) {
 
     false
   }
-
-  var x: Int = 0
-  var y: Int = 0
 
   override def onGraphicRender(g: GdxGraphics): Unit = {
 

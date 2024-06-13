@@ -170,37 +170,20 @@ class Grid(x: Int, y: Int) extends Serializable {
     true
   }
 
-  def move(action: Direction, inv : Boolean = false): Int = {
-    if (inv) {
-      moveInv(action)
-    }
-    else {
-      val headX: Int = getHeadPos.x
-      val headY: Int = getHeadPos.y
+  def move(action: Direction): Int = {
 
-      if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0)
-        0
-      else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
-        0
-      else {
-        grid(headY + action.actionY)(headX + action.actionX).setValueInt(grid(headY)(headX).getValueInt + 1)
-        1 + move(action)
-      }
-    }
-  }
-
-  private def moveInv(action: Direction): Int = {
     val headX: Int = getHeadPos.x
     val headY: Int = getHeadPos.y
 
     if (action.actionX + headX >= grid(0).length || action.actionX + headX < 0 || action.actionY + headY >= grid.length || action.actionY + headY < 0)
       0
-    else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || !grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
+    else if (grid(headY + action.actionY)(headX + action.actionX).isObstacl || grid(headY + action.actionY)(headX + action.actionX).haveSquatter)
       0
     else {
-      grid(headY + action.actionY)(headX + action.actionX).setValueInt(0)
+      grid(headY + action.actionY)(headX + action.actionX).setValueInt(grid(headY)(headX).getValueInt + 1)
       1 + move(action)
     }
+
   }
 
   def getHeadPos: Position = {
